@@ -1,0 +1,320 @@
+import * as FileSystem from 'expo-file-system/legacy';
+import * as ImagePicker from 'expo-image-picker';
+import { LinearGradient } from 'expo-linear-gradient';
+import * as MediaLibrary from 'expo-media-library';
+import { useRouter } from 'expo-router';
+import * as Sharing from 'expo-sharing';
+import { ArrowLeft, Camera, Download, Image as ImageIcon, Share2, Sparkles, X } from 'lucide-react-native';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, Image, Modal, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+// Importamos la función de IA desde la ruta correcta (src/services)
+import { generateAIImage } from '../src/services/gemini';
+
+// Definición de una Opción Visual (Tarjeta)
+export interface ToolOption {
+  id: string;      // Identificador para la IA (ej: 'rock')
+  label: string;   // Texto para el usuario (ej: 'Rockero')
+  image: string;   // URL de la imagen de ejemplo
+}
+
+// Propiedades que recibe este componente reutilizable
+interface ToolProps {
+  title: string;
+  subtitle: string;
+  price: number;
+  backgroundImage: string;
+  apiMode: string;        // Modo base de la IA (ej: 'stylist')
+  options?: ToolOption[]; // Lista opcional de sub-estilos
+}
+
+export default function GenericToolScreen({ title, subtitle, price, backgroundImage, apiMode, options }: ToolProps) {
+  const router = useRouter();
+  
+  // --- ESTADOS ---
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [loadingStage, setLoadingStage] = useState("");
+  const [resultImage, setResultImage] = useState<string | null>(null);
+  const [showSelectionModal, setShowSelectionModal] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
+  
+  // Estado para la opción seleccionada (ej: 'urban')
+  const [selectedOption, setSelectedOption] = useState<string | null>(null);
+
+  // Seleccionar automáticamente la primera opción si existen opciones
+  useEffect(() => {
+    if (options && options.length > 0) {
+      setSelectedOption(options[0].id);
+    }
+  }, [options]);
+
+  const resetState = () => {
+    setResultImage(null);
+    setSelectedImage(null);
+    setLoadingStage("");
+    setIsProcessing(false);
+    setIsSaving(false);
+    setIsSharing(false);
+    if (options && options.length > 0) setSelectedOption(options[0].id);
+  };
+
+  const pickImage = async (useCamera: boolean) => {
+    setShowSelectionModal(false);
+    const permissionResult = useCamera 
+      ? await ImagePicker.requestCameraPermissionsAsync()
+      : await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (permissionResult.status !== 'granted') {
+      return Alert.alert("Faltan permisos", "Necesitamos acceso para continuar.");
+    }
+
+    // Nombramos 'pickerOptions' para no confundir con las 'options' de estilos
+    const pickerOptions: ImagePicker.ImagePickerOptions = {
+      mediaTypes: ImagePicker.MediaTypeOptions.Images, 
+      allowsEditing: true, 
+      aspect: [4, 5], 
+      quality: 0.8 
+    };
+
+    const result = useCamera 
+      ? await ImagePicker.launchCameraAsync(pickerOptions)
+      : await ImagePicker.launchImageLibraryAsync(pickerOptions);
+
+    if (!result.canceled) {
+      setSelectedImage(result.assets[0].uri);
+    }
+  };
+
+  const handleGenerate = async () => {
+    if (!selectedImage) return;
+    setIsProcessing(true);
+    setLoadingStage("Generando magia..."); 
+    
+    try {
+      // Enviamos la imagen, el modo base y la variante seleccionada (si hay)
+      const generatedImageBase64 = await generateAIImage(selectedImage, apiMode, selectedOption);
+
+      if (generatedImageBase64) {
+        setResultImage(generatedImageBase64);
+      } else {
+        Alert.alert("Error", "El modelo no pudo generar la imagen. Intenta de nuevo.");
+      }
+    } catch (error) {
+      console.error(error);
+      Alert.alert("Error IA", "Hubo un problema técnico.");
+    } finally {
+      setIsProcessing(false);
+      setLoadingStage("");
+    }
+  };
+
+  const handleSave = async () => {
+    if (!resultImage) return;
+    setIsSaving(true);
+    try {
+      const { status } = await MediaLibrary.requestPermissionsAsync();
+      if (status !== 'granted') return Alert.alert("Permiso denegado");
+      
+      const directory = FileSystem.cacheDirectory;
+      const filename = directory + `aura_ai_${Date.now()}.png`;
+      const base64Code = resultImage.includes('base64,') ? resultImage.split('base64,')[1] : resultImage;
+      
+      await FileSystem.writeAsStringAsync(filename, base64Code, { encoding: 'base64' });
+      const asset = await MediaLibrary.createAssetAsync(filename);
+      const album = await MediaLibrary.getAlbumAsync('Aura AI');
+      
+      if (album) { await MediaLibrary.addAssetsToAlbumAsync([asset], album, false); } 
+      else { await MediaLibrary.createAlbumAsync('Aura AI', asset, false); }
+      
+      Alert.alert("✅ Guardado", "Foto guardada en el álbum 'Aura AI'.");
+    } catch (error: any) { Alert.alert("Error", error.message); } finally { setIsSaving(false); }
+  };
+
+  const handleShare = async () => {
+    if (!resultImage) return;
+    setIsSharing(true);
+    try {
+      const directory = FileSystem.cacheDirectory;
+      const filename = directory + `share_aura_${Date.now()}.png`;
+      const base64Code = resultImage.includes('base64,') ? resultImage.split('base64,')[1] : resultImage;
+      await FileSystem.writeAsStringAsync(filename, base64Code, { encoding: 'base64' });
+      
+      if (await Sharing.isAvailableAsync()) { await Sharing.shareAsync(filename); }
+    } catch (error) { Alert.alert("Error", "No se pudo compartir."); } finally { setIsSharing(false); }
+  };
+
+  // --- RENDERIZADO: PANTALLA DE RESULTADO ---
+  if (resultImage) {
+    return (
+      <View className="flex-1 bg-black">
+        <Image source={{ uri: resultImage }} className="absolute w-full h-full" resizeMode="contain" />
+        <LinearGradient colors={['transparent', 'rgba(0,0,0,0.9)']} className="absolute bottom-0 w-full h-1/2" />
+        <SafeAreaView className="flex-1 justify-between px-6 pb-8">
+          <View className="items-end pt-4">
+            <View className="bg-indigo-500 px-3 py-1 rounded-full shadow-lg">
+               <Text className="text-white font-bold text-xs">✨ IA GENERADA</Text>
+            </View>
+          </View>
+          <View>
+            <Text className="text-white text-3xl font-bold text-center mb-2">¡Tu Nuevo Look!</Text>
+            <View className="flex-row gap-4 mb-4">
+              <TouchableOpacity onPress={handleShare} disabled={isSharing} className="flex-1 h-14 bg-zinc-800 rounded-2xl justify-center items-center border border-white/10">
+                 {isSharing ? <ActivityIndicator color="white" /> : <><Share2 size={20} color="white" className="mr-2" /><Text className="text-white font-bold">Compartir</Text></>}
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleSave} disabled={isSaving} className="flex-1 h-14 bg-white rounded-2xl justify-center items-center shadow-lg">
+                 {isSaving ? <ActivityIndicator color="black" /> : <><Download size={20} color="black" className="mr-2" /><Text className="text-black font-bold">Guardar</Text></>}
+              </TouchableOpacity>
+            </View>
+            <TouchableOpacity onPress={resetState} className="h-12 items-center justify-center">
+               <Text className="text-zinc-500 font-bold">Probar otra vez</Text>
+            </TouchableOpacity>
+          </View>
+        </SafeAreaView>
+      </View>
+    );
+  }
+
+  // --- RENDERIZADO: PANTALLA PRINCIPAL (SELECCIÓN) ---
+  return (
+    <View className="flex-1 bg-[#0f0f0f]">
+      {/* Fondo Dinámico */}
+      <Image 
+        source={{ uri: selectedImage ? selectedImage : backgroundImage }} 
+        className="absolute w-full h-full opacity-60" 
+        blurRadius={selectedImage ? 0 : 20}
+        resizeMode="cover"
+      />
+      <LinearGradient colors={['transparent', '#0f0f0f']} className="absolute w-full h-full" />
+
+      <SafeAreaView className="flex-1 px-6">
+        {/* Header */}
+        <View className="flex-row justify-between items-center mb-6">
+          <TouchableOpacity onPress={() => router.back()} className="w-10 h-10 bg-black/40 rounded-full items-center justify-center border border-white/10">
+            <ArrowLeft size={24} color="white" />
+          </TouchableOpacity>
+          {selectedImage && (
+             <TouchableOpacity onPress={() => setSelectedImage(null)} className="bg-black/40 px-3 py-1 rounded-full border border-white/10 flex-row items-center">
+                <X size={14} color="white" className="mr-1"/>
+                <Text className="text-white text-xs font-bold">Cancelar</Text>
+             </TouchableOpacity>
+          )}
+        </View>
+
+        <View className="flex-1 justify-end pb-12">
+          {!selectedImage ? (
+            // ESTADO 1: ANTES DE SUBIR FOTO
+            <>
+              <View className="bg-rose-500 self-start px-3 py-1 rounded-full mb-4 shadow-lg">
+                <Text className="text-white text-xs font-bold">POPULAR</Text>
+              </View>
+              <Text className="text-white text-4xl font-bold mb-2">{title}</Text>
+              <Text className="text-zinc-400 text-lg mb-8">{subtitle}</Text>
+              <TouchableOpacity 
+                className="w-full h-16 bg-indigo-500 rounded-2xl flex-row items-center justify-center shadow-lg shadow-indigo-500/50"
+                onPress={() => setShowSelectionModal(true)}
+              >
+                <Camera size={24} color="white" className="mr-3" />
+                <Text className="text-white font-bold text-lg">Subir Foto ({price} 💎)</Text>
+              </TouchableOpacity>
+            </>
+          ) : (
+            // ESTADO 2: FOTO LISTA, ELIGIENDO ESTILO
+            <View className="bg-black/80 p-6 rounded-3xl border border-white/10 backdrop-blur-xl">
+                <Text className="text-white text-xl font-bold mb-1 text-center">Foto seleccionada</Text>
+                <Text className="text-zinc-400 text-sm mb-6 text-center">Listo para procesar.</Text>
+
+                {/* --- SECCIÓN DE TARJETAS DE ESTILO (NUEVO) --- */}
+                {options && (
+                  <View className="mb-6">
+                    <Text className="text-zinc-500 text-xs font-bold mb-3 uppercase tracking-widest ml-1">Elige un estilo</Text>
+                    <ScrollView 
+                      horizontal 
+                      showsHorizontalScrollIndicator={false} 
+                      contentContainerStyle={{ gap: 12, paddingRight: 20 }}
+                    >
+                      {options.map((opt) => {
+                        const isSelected = selectedOption === opt.id;
+                        return (
+                          <TouchableOpacity 
+                            key={opt.id}
+                            onPress={() => setSelectedOption(opt.id)}
+                            className="relative"
+                            activeOpacity={0.8}
+                          >
+                            {/* IMAGEN DE LA TARJETA */}
+                            <View 
+                              className={`w-24 h-32 rounded-xl overflow-hidden border-2 ${isSelected ? 'border-indigo-500' : 'border-white/20'}`}
+                            >
+                              <Image 
+                                source={{ uri: opt.image }} 
+                                className={`w-full h-full ${isSelected ? 'opacity-100' : 'opacity-70'}`} 
+                                resizeMode="cover" 
+                              />
+                              <LinearGradient 
+                                colors={['transparent', 'rgba(0,0,0,0.8)']} 
+                                className="absolute bottom-0 w-full h-1/2" 
+                              />
+                            </View>
+
+                            {/* TEXTO DE LA TARJETA */}
+                            <View className="absolute bottom-2 left-0 right-0 items-center">
+                              <Text className={`text-xs font-bold ${isSelected ? 'text-white' : 'text-zinc-300'}`}>
+                                {opt.label}
+                              </Text>
+                            </View>
+
+                            {/* CHECK DE SELECCIÓN */}
+                            {isSelected && (
+                              <View className="absolute top-2 right-2 bg-indigo-500 rounded-full p-1 shadow-sm">
+                                <Sparkles size={10} color="white" />
+                              </View>
+                            )}
+                          </TouchableOpacity>
+                        );
+                      })}
+                    </ScrollView>
+                  </View>
+                )}
+                {/* ------------------------------------------- */}
+
+                <TouchableOpacity 
+                  className={`w-full h-16 rounded-2xl flex-row items-center justify-center ${isProcessing ? 'bg-zinc-700' : 'bg-indigo-500'}`}
+                  style={!isProcessing ? { shadowColor: '#6366f1', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 8 } : {}}
+                  onPress={handleGenerate}
+                  disabled={isProcessing}
+                >
+                  {isProcessing ? (
+                     <><ActivityIndicator color="white" className="mr-3" /><Text className="text-zinc-300 font-bold text-xs">{loadingStage || "Procesando..."}</Text></>
+                  ) : (
+                    <><Sparkles size={24} color="white" className="mr-3" /><Text className="text-white font-bold text-lg">Generar con IA</Text></>
+                  )}
+                </TouchableOpacity>
+            </View>
+          )}
+        </View>
+      </SafeAreaView>
+
+      <Modal visible={showSelectionModal} transparent animationType="fade">
+         <View className="flex-1 bg-black/80 justify-end">
+            <View className="bg-[#1c1c1e] rounded-t-[32px] p-6 pb-12 border-t border-white/10">
+               <Text className="text-white text-xl font-bold text-center mb-2">Subir Foto</Text>
+               <Text className="text-zinc-500 text-center mb-8">Elige el origen</Text>
+               <TouchableOpacity onPress={() => pickImage(true)} className="bg-zinc-800 p-4 rounded-2xl mb-3 flex-row items-center border border-white/5">
+                  <View className="w-10 h-10 bg-indigo-500/20 rounded-full items-center justify-center mr-4"><Camera size={20} color="#818cf8" /></View>
+                  <Text className="text-white font-bold text-lg">Cámara</Text>
+               </TouchableOpacity>
+               <TouchableOpacity onPress={() => pickImage(false)} className="bg-zinc-800 p-4 rounded-2xl mb-6 flex-row items-center border border-white/5">
+                  <View className="w-10 h-10 bg-purple-500/20 rounded-full items-center justify-center mr-4"><ImageIcon size={20} color="#c084fc" /></View>
+                  <Text className="text-white font-bold text-lg">Galería</Text>
+               </TouchableOpacity>
+               <TouchableOpacity onPress={() => setShowSelectionModal(false)} className="py-3 items-center">
+                  <Text className="text-zinc-400 font-bold">Cancelar</Text>
+               </TouchableOpacity>
+            </View>
+         </View>
+      </Modal>
+    </View>
+  );
+}
