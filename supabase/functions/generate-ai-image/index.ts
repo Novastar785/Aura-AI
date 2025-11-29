@@ -24,10 +24,11 @@ serve(async (req) => {
     }
 
     // 3. Recibimos los datos que envía tu celular
-    const { prompt, imageBase64, modelName } = await req.json();
+    // UPDATE: Agregamos 'garmentBase64' para el Virtual Try On (opcional)
+    const { prompt, imageBase64, garmentBase64, modelName } = await req.json();
 
     if (!prompt || !imageBase64) {
-      throw new Error("Faltan datos: No llegó el prompt o la imagen.");
+      throw new Error("Faltan datos: No llegó el prompt o la imagen principal.");
     }
 
     // 4. Conectamos con Google (Lado Servidor)
@@ -36,11 +37,23 @@ serve(async (req) => {
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: modelId });
 
-    // 5. Generamos la imagen
-    const result = await model.generateContent([
+    // 5. Preparamos el contenido para la IA (Soporte Multimodal)
+    // Construimos un array dinámico de partes
+    const contentParts = [
       prompt,
-      { inlineData: { data: imageBase64, mimeType: "image/jpeg" } }
-    ]);
+      { inlineData: { data: imageBase64, mimeType: "image/jpeg" } } // Imagen 1: Usuario (Base)
+    ];
+
+    // Si nos enviaron una prenda (Virtual Try On), la agregamos como segunda imagen
+    if (garmentBase64) {
+      console.log("👗 Modo Virtual Try On detectado: Agregando imagen de prenda...");
+      contentParts.push({ 
+        inlineData: { data: garmentBase64, mimeType: "image/jpeg" } 
+      });
+    }
+
+    // 6. Generamos la imagen
+    const result = await model.generateContent(contentParts);
 
     const response = result.response;
     const candidates = response.candidates;
@@ -49,7 +62,7 @@ serve(async (req) => {
         throw new Error("Gemini no devolvió ninguna imagen.");
     }
 
-    // 6. Preparamos la imagen para devolverla al celular
+    // 7. Preparamos la imagen para devolverla al celular
     const imagePart = candidates[0].content.parts.find(
       (part) => part.inlineData && part.inlineData.mimeType.startsWith('image/')
     );
@@ -59,7 +72,7 @@ serve(async (req) => {
       finalData = `data:${imagePart.inlineData.mimeType};base64,${imagePart.inlineData.data}`;
     }
 
-    // 7. Enviamos la respuesta final
+    // 8. Enviamos la respuesta final
     return new Response(JSON.stringify({ image: finalData }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

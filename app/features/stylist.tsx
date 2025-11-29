@@ -9,32 +9,37 @@ export default function StylistScreen() {
     { 
       id: 'urban', 
       label: 'Urbano', 
-      image: 'https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?w=300&q=80' // Chico con hoodie en la calle
+      image: 'https://rizzflows.com/img_aura/Image_fx(4).png' // Chico con hoodie en la calle
     },
     { 
       id: 'rock', 
       label: 'Rockero', 
-      image: 'https://images.unsplash.com/photo-1746688384436-5de8ea663966?w=300&q=80' // Ambiente concierto/guitarra
+      image: 'https://rizzflows.com/img_aura/rockera.jpeg' // Ambiente concierto/guitarra
     },
     { 
       id: 'cyberpunk', 
       label: 'Cyberpunk', 
-      image: 'https://images.unsplash.com/photo-1580046939256-c377c5b099f1?w=300&q=80' // Luces neón y lluvia
+      image: 'https://rizzflows.com/img_aura/Image_fx(5).png' // Luces neón y lluvia
     },
     { 
       id: 'viking', 
       label: 'Vikingo', 
-      image: 'https://images.unsplash.com/photo-1612018564901-7e689c6693ec?w=300&q=80' // Bosque oscuro y misterioso
+      image: 'https://rizzflows.com/img_aura/Image_fx(6).png' // Bosque oscuro y misterioso
+    },
+    { 
+      id: 'retro', 
+      label: 'retro', 
+      image: 'https://rizzflows.com/img_aura/Image_fx(11).png' // Bosque oscuro y misterioso
     },
   ];
 
   return (
     <GenericToolScreen 
-      title="Virtual Stylist"
+      title="Stylist"
       subtitle="Elige tu estilo y deja que la IA diseñe tu outfit."
       price={15}
       // Imagen de fondo general de la pantalla
-      backgroundImage="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&q=80"
+      backgroundImage="https://rizzflows.com/img_aura/Image_fx(3).png"
       apiMode="stylist"
       options={options}
     />

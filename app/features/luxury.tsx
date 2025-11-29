@@ -7,7 +7,7 @@ export default function LuxuryScreen() {
       title="Luxury Flex"
       subtitle="Viaja en jet privado o yate sin salir de casa."
       price={25}
-      backgroundImage="https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=600&q=80"
+      backgroundImage="https://rizzflows.com/img_aura/bmw%20rojo.jpg"
       apiMode="luxury"
     />
   );

@@ -9,27 +9,27 @@ export const MODELS = {
 };
 
 
-//  1. HEADSHOT (Foto LinkedIn)
+
+
+// 6. Virtual Try On
 const FEATURE_PROMPTS = {
-  headshot: `
-    Generate a photorealistic professional LinkedIn headshot based on the input image.
-     
-    **Technical Specifications:**
-    - Style: High-end corporate headshot, professional photography.
-    - Lighting: Soft studio lighting, Rembrandt lighting, flattering.
-    - Camera: 85mm lens, f/1.8 aperture.
-    - Resolution: 8k, photorealistic, highly detailed skin texture.
-    **IDENTITY:** The face must remain unmistakably the user's face, just visually enhanced
-    
-    **Context & Attire:**
-    - Clothing: Modern professional business attire (suit, well-fitted blazer, crisp shirt/blouse), neutral or navy colors.
-    - Background: Blurred modern office, bokeh, neutral tones, professional setting.
-    - REPLACE THE EXPRESSION: The subject must have a **confident, neutral, and friendly professional expression**. A slight, closed-mouth smile is preferred.
-        
-    **Negative Prompt (Avoid):**
-    Cartoon, illustration, 3d render, painting, deformed face, extra fingers, bad anatomy, blurry face, low resolution, distorted eyes, changing ethnicity, changing age.
+
+  tryon: `
+    Act as an expert AI Virtual Try-On Stylist.
+    You have two inputs:
+    1. A photo of a PERSON (User).
+    2. A photo  from where you have to get the GARMENT/OUTFIT.
+
+    **TASK:**
+    Generate a photorealistic full-body image of the PERSON from Image 1 wearing the GARMENT from Image 2.
+
+    **REQUIREMENTS:**
+    - **IDENTITY PRESERVATION:** The face, body shape, skin tone, and pose must match the person in Image 1 exactly.
+    - **GARMENT TRANSFER:** Replace the person's original clothing with the garment from Image 2. Adapt the fit naturally to the person's pose and body shape.
+    - **REALISM:** Pay attention to fabric texture, lighting consistency, folds, and shadows. It must look like a real photo, not a collage.
   `,
-  // 2. VIRTUAL STYLIST (Cambio de Outfit)
+
+  // 2. STYLIST (Cambio de Estilo)
   stylist: `
   Act as a high-end fashion stylist. Change the subject's outfit to a trendy, modern, and stylish ensemble.
     **Technical Specifications:**
@@ -102,6 +102,18 @@ const FEATURE_PROMPTS = {
     **IDENTITY:** The face must remain unmistakably the user's face, just visually enhanced
   `,
 
+  // 5. RETRO 🤖
+  stylist_retro: `
+    Transport the subject into a FUTURISTIC CYBERPUNK city.
+   
+    **Technical Specifications:**
+    - Clothing: Techwear, neon glowing accents on jacket, metallic fabrics, futuristic visor or glasses (optional).
+    - Background: Rainy futuristic city street with bright neon signs (pink, blue, purple).
+    - Lighting: High contrast neon lighting reflecting on skin and clothes.
+    - Vibe: Sci-fi, edgy, futuristic.
+    **IDENTITY:** The face must remain unmistakably the user's face, just visually enhanced
+  `,
+
   // 3. LUXURY FLEX (Estilo Millonario)
   luxury: `
     Transport the subject into a scene of extreme wealth and luxury.
@@ -157,24 +169,177 @@ const FEATURE_PROMPTS = {
     **IDENTITY:** The face must remain unmistakably the user's face, just visually enhanced
   `,
 
-  // 6. RETRO / TIME TRAVELER (Años 90s)
-  retro: `
-    Transform the image into a 1990s yearbook photo or vintage aesthetic.
-    
+    // 7. HAIR STUDIO
+   hairstudio: `
+    ACT as a Master Hair Colorist and Stylist.
+    Your goal is to give the subject a completely new hairstyle while keeping their face identical.
     
     **Technical Specifications:**
-    - Filter: Film grain, slight color fade, VHS aesthetic.
-    - Clothing: 90s fashion (denim jackets, turtlenecks, colorful patterns).
-    - Background: Laser background or 90s retro studio pattern.
-    - Vibe: Nostalgic, vintage cool.
+    - Focus: Realistic hair texture, shine, and volume.
+    - Lighting: Salon quality lighting to highlight hair color dimensions.
+    **IDENTITY:** The face, skin tone, and features must remain 100% identical to the user.
+  `,
+  hairstudio_butterfly: `
+    Act as a professional hair stylist. Give the subject a trendy Butterfly Cut.
+    
+    - Vibe: Viral TikTok style, chic, voluminous.
+    **IDENTITY:** The face must remain unmistakably the user's face. Only change the hair.
+  `,
+  hairstudio_layer: `
+    Act as a professional hair stylist. Give the subject a Long Layered Haircut.
+    
+    **Technical Specifications:**
+    - Style: Voluminous, cascading layers that frame the face.
+    - Texture: Soft, blown-out salon finish.
+    - Length: Retain length but add movement and dimension.
+    - Vibe: Elegant, feminine, "supermodel blowout".
+    **IDENTITY:** The face must remain unmistakably the user's face. Only change the hair.
+  `,
+   hairstudio_bob: `
+    CHANGE the subject's hair to a chic FRENCH BOB CUT (chin length).
+    Style: Sleek, straight, modern.
+    **IDENTITY:** The face must remain unmistakably the user's face.
+  `,
+   hairstudio_mullet: `
+    Act as a visionary stylist. Give the subject a Modern Mullet.
+    
+    **Technical Specifications:**
+    - Style: Shorter sides (fade or taper), significantly longer hair at the back/neck.
+    - Texture: Textured top, not messy but edgy.
+    **IDENTITY:** The face must remain unmistakably the user's face. Only change the hair.
+  `,
+   hairstudio_fade: `
+    Act as a high-end barber. Give the subject a sharp Taper Fade haircut.
+    
+    **Technical Specifications:**
+    - Style: Clean gradient on the sides and back (fading into skin or very short), keeping length and texture on top.
+    - Edges: Crisply lined up (shape-up).
+    - Vibe: Professional, clean, modern gentleman.
+    **IDENTITY:** The face must remain unmistakably the user's face. Only change the hair.
+  `,
+   hairstudio_buzzcut: `
+    Act as a barber. Give the subject a Buzz Cut.
+    
+    - Hairline: Sharp and defined box or natural line.
+    - Vibe: Rugged, masculine, minimalist, tough.
+    **IDENTITY:** The face must remain unmistakably the user's face. Only change the hair.
+  `,
+  hairstudio_blonde: `
+    CHANGE the subject's hair to a LUXURIOUS PLATINUM BLONDE.
+    Style: Soft waves, voluminous, expensive-looking. 
+    Roots: Slight shadow root for realism (balayage).
+    **IDENTITY:** The face must remain unmistakably the user's face.
+  `,
+  hairstudio_dark: `
+    Change the hair color to a LUXURIOUS DARK CHESTNUT BROWN (Castaño Oscuro).
+    
+    - Texture: Highly reflective, "glass hair" shine.
+    - Vibe: Natural, healthy, sophisticated.
+    - Avoid: Pitch black (jet black) or flat color; ensure it has natural brown depth.
+    **IDENTITY:** The face must remain unmistakably the user's face.
+  `,
+  // 3. Balayage
+  hairstudio_balayage: `
+    Apply a High-End BALAYAGE coloring technique to the hair.
+    
+    **Technical Specifications:**
+    - Transition from darker roots to lighter ends.
+    - Tones: Sun-kissed caramel, honey, or sand tones blended into the natural base color.
+    - Finish: Multidimensional, soft gradient, expensive salon look.
+    **IDENTITY:** The face must remain unmistakably the user's face.
+  `,
+  hairstudio_red: `
+    Change the hair color to an INTENSE COPPER RED with CHESTNUT LOWLIGHTS.
+    
+    **Color Palette:**
+    - Base: Deep, rich metallic copper (Rojo Cobrizo Profundo).
+    - Highlights: Subtle chestnut/brown streaks for dimension.
+    - Finish: Glossy, hydrated, salon-quality color.
+    
+    **NEGATIVE PROMPT (CRITICAL):**
+    NO orange tones, no carrot color, no bright neon orange, no brassy yellow, no unnatural fantasy red.
+    **IDENTITY:** The face must remain unmistakably the user's face.
+  `,
+ 
+
+  // 8. GLOBETROTTER (Viajero)
+  globetrotter: `
+    Transport the subject to a world-famous travel destination.
+    Adjust the lighting on the subject to match the environment perfectly.
+    **IDENTITY:** The face must remain unmistakably the user's face.
+  `,
+  globetrotter_santorini: `
+    Transport the subject to SANTORINI, GREECE.
+    Background: White buildings with blue domes, caldera view, sunset.
+    Lighting: Golden hour, warm, glowing.
+    Vibe: Luxury vacation, influencer travel.
+    **IDENTITY:** The face must remain unmistakably the user's face.
+  `,
+  globetrotter_paris: `
+    Transport the subject to PARIS, FRANCE (Eiffel Tower view).
+    Vibe: Romantic, overcast soft lighting, fashion week style.
+    **IDENTITY:** The face must remain unmistakably the user's face.
+  `,
+  globetrotter_nyc: `
+    Transport the subject to TIMES SQUARE, NEW YORK at night.
+    Lighting: Neon lights reflecting on the skin, vibrant, urban.
+    **IDENTITY:** The face must remain unmistakably the user's face.
+  `,
+
+  // 9. FITNESS BODY
+  fitness: `
+    TRANSFORM the subject into a FITNESS MODEL version of themselves.
+    
+    **Technical Specifications:**
+    - Body: Athletic, toned, muscular but natural.
+    - Clothing: Premium sportswear (Nike/Gymshark style).
+    - Background: Modern high-end gym or running track.
+    **IDENTITY:** The face must remain unmistakably the user's face.
+  `,
+  fitness_shredded: `
+    Make the subject look SHREDDED (low body fat, high muscle definition).
+    Lighting: Dramatic overhead gym lighting (downlighting) to accentuate muscles.
+    **IDENTITY:** The face must remain unmistakably the user's face.
+  `,
+  fitness_yoga: `
+    Physique: Lean, toned, flexible (Yoga/Pilates body).
+    Clothing: Yoga leggings and top in neutral colors.
+    Background: Peaceful yoga studio with bamboo and soft light.
+    **IDENTITY:** The face must remain unmistakably the user's face.
+  `,
+
+  // 1. HEADSHOT (Foto LinkedIn)
+  headshot: `
+    Generate a photorealistic professional LinkedIn headshot based on the input image.
+     
+    **Technical Specifications:**
+    - Style: High-end corporate headshot, professional photography.
+    - Lighting: Soft studio lighting, Rembrandt lighting, flattering.
+    - Camera: 85mm lens, f/1.8 aperture.
+    - Resolution: 8k, photorealistic, highly detailed skin texture.
     **IDENTITY:** The face must remain unmistakably the user's face, just visually enhanced
-  `
+    
+    **Context & Attire:**
+    - Clothing: Modern professional business attire (suit, well-fitted blazer, crisp shirt/blouse), neutral or navy colors.
+    - Background: Blurred modern office, bokeh, neutral tones, professional setting.
+    - REPLACE THE EXPRESSION: The subject must have a **confident, neutral, and friendly professional expression**. A slight, closed-mouth smile is preferred.
+        
+    **Negative Prompt (Avoid):**
+    Cartoon, illustration, 3d render, painting, deformed face, extra fingers, bad anatomy, blurry face, low resolution, distorted eyes, changing ethnicity, changing age.
+  `,
   // Aquí pueden ir mas prompts...
 };
 
 console.log("🔑 Iniciando Servicio Gemini (vía Supabase Proxy)...");
 
-export const generateAIImage = async (imageUri: string, featureKey: string, variant: string | null = null): Promise<string | null> => {
+// MODIFICACIÓN: Agregamos garmentUri como parámetro opcional al final
+export const generateAIImage = async (
+  imageUri: string, 
+  featureKey: string, 
+  variant: string | null = null,
+  garmentUri: string | null = null
+): Promise<string | null> => {
+  
   const modelId = MODELS.ARTIST_PRO;
   
   // LÓGICA DE SELECCIÓN DE PROMPT
@@ -196,6 +361,13 @@ export const generateAIImage = async (imageUri: string, featureKey: string, vari
   try {
     const base64 = await FileSystem.readAsStringAsync(imageUri, { encoding: 'base64' });
     
+    // LÓGICA TRY ON: Leemos la segunda imagen si existe
+    let garmentBase64 = null;
+    if (garmentUri) {
+        console.log("👗 Procesando imagen de prenda para Try On...");
+        garmentBase64 = await FileSystem.readAsStringAsync(garmentUri, { encoding: 'base64' });
+    }
+    
     // Obtenemos el prompt del mapa local
     const systemPrompt = FEATURE_PROMPTS[promptKey as keyof typeof FEATURE_PROMPTS];
 
@@ -211,6 +383,7 @@ export const generateAIImage = async (imageUri: string, featureKey: string, vari
         body: { 
             prompt: systemPrompt,
             imageBase64: base64,
+            garmentBase64: garmentBase64, // Enviamos la prenda si existe
             modelName: modelId 
         }
     });

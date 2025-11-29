@@ -1,0 +1,255 @@
+import * as FileSystem from 'expo-file-system/legacy';
+import * as ImagePicker from 'expo-image-picker';
+import { LinearGradient } from 'expo-linear-gradient';
+import * as MediaLibrary from 'expo-media-library';
+import { useRouter } from 'expo-router';
+import * as Sharing from 'expo-sharing';
+import { ArrowLeft, Camera, CheckCircle2, Download, Share2, Shirt, Sparkles, User } from 'lucide-react-native';
+import React, { useState } from 'react';
+import { ActivityIndicator, Alert, Image, Modal, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { generateAIImage } from '../src/services/gemini';
+
+interface TryOnProps {
+  title: string;
+  subtitle: string;
+  price: number;
+  backgroundImage: string; // ✨ NUEVA PROP
+}
+
+export default function TryOnToolScreen({ title, subtitle, price, backgroundImage }: TryOnProps) {
+  const router = useRouter();
+  
+  // --- ESTADOS PARA LAS 2 IMÁGENES ---
+  const [userImage, setUserImage] = useState<string | null>(null);
+  const [garmentImage, setGarmentImage] = useState<string | null>(null);
+  
+  const [activePicker, setActivePicker] = useState<'user' | 'garment' | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [resultImage, setResultImage] = useState<string | null>(null);
+  const [showSelectionModal, setShowSelectionModal] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
+
+  const isReady = userImage !== null && garmentImage !== null;
+
+  // --- LÓGICA DE SELECCIÓN ---
+  const pickImage = async (useCamera: boolean) => {
+    setShowSelectionModal(false);
+    if (!activePicker) return;
+
+    const permissionResult = useCamera 
+      ? await ImagePicker.requestCameraPermissionsAsync()
+      : await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (permissionResult.status !== 'granted') {
+      return Alert.alert("Faltan permisos", "Necesitamos acceso.");
+    }
+
+    const options: ImagePicker.ImagePickerOptions = {
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 0.8,
+    };
+
+    const result = useCamera 
+      ? await ImagePicker.launchCameraAsync(options)
+      : await ImagePicker.launchImageLibraryAsync(options);
+
+    if (!result.canceled) {
+      if (activePicker === 'user') setUserImage(result.assets[0].uri);
+      if (activePicker === 'garment') setGarmentImage(result.assets[0].uri);
+    }
+    setActivePicker(null);
+  };
+
+  const openPicker = (type: 'user' | 'garment') => {
+    setActivePicker(type);
+    setShowSelectionModal(true);
+  };
+
+  // --- GENERACIÓN ---
+  const handleGenerate = async () => {
+    if (!userImage || !garmentImage) return;
+    setIsProcessing(true);
+    try {
+      const generated = await generateAIImage(userImage, 'tryon', null, garmentImage);
+      if (generated) setResultImage(generated);
+      else Alert.alert("Error", "No se pudo generar.");
+    } catch (e) {
+      Alert.alert("Error", "Falló la conexión.");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const resetState = () => {
+    setResultImage(null);
+    setUserImage(null);
+    setGarmentImage(null);
+  };
+
+  const handleSave = async () => {
+    if (!resultImage) return;
+    setIsSaving(true);
+    try {
+      const { status } = await MediaLibrary.requestPermissionsAsync();
+      if (status !== 'granted') return Alert.alert("Permiso denegado");
+      const filename = FileSystem.cacheDirectory + `aura_tryon_${Date.now()}.png`;
+      const base64Code = resultImage.includes('base64,') ? resultImage.split('base64,')[1] : resultImage;
+      await FileSystem.writeAsStringAsync(filename, base64Code, { encoding: 'base64' });
+      await MediaLibrary.createAssetAsync(filename);
+      Alert.alert("✅ Guardado", "Imagen guardada.");
+    } catch (error) { Alert.alert("Error", "No se pudo guardar."); } finally { setIsSaving(false); }
+  };
+
+  const handleShare = async () => {
+    if (!resultImage) return;
+    setIsSharing(true);
+    try {
+        const filename = FileSystem.cacheDirectory + `share_tryon_${Date.now()}.png`;
+        const base64Code = resultImage.includes('base64,') ? resultImage.split('base64,')[1] : resultImage;
+        await FileSystem.writeAsStringAsync(filename, base64Code, { encoding: 'base64' });
+        if (await Sharing.isAvailableAsync()) { await Sharing.shareAsync(filename); }
+    } catch (error) { Alert.alert("Error", "No se pudo compartir."); } finally { setIsSharing(false); }
+  };
+
+  if (resultImage) {
+    return (
+      <View className="flex-1 bg-black">
+        <Image source={{ uri: resultImage }} className="absolute w-full h-full" resizeMode="contain" />
+        <LinearGradient colors={['transparent', 'rgba(0,0,0,0.9)']} className="absolute bottom-0 w-full h-1/2" />
+        <SafeAreaView className="flex-1 justify-between px-6 pb-8">
+          <View className="items-end pt-4"><View className="bg-purple-600 px-3 py-1 rounded-full border border-white/20"><Text className="text-white font-bold text-xs">VIRTUAL TRY ON ✨</Text></View></View>
+          <View>
+            <Text className="text-white text-3xl font-bold text-center mb-6">¡Outfit Probado!</Text>
+            <View className="flex-row gap-4 mb-4">
+              <TouchableOpacity onPress={handleShare} disabled={isSharing} className="flex-1 h-14 bg-zinc-800 rounded-2xl justify-center items-center border border-white/10">
+                 {isSharing ? <ActivityIndicator color="white" /> : <><Share2 size={20} color="white" className="mr-2" /><Text className="text-white font-bold">Compartir</Text></>}
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleSave} disabled={isSaving} className="flex-1 h-14 bg-white rounded-2xl justify-center items-center shadow-lg">
+                 {isSaving ? <ActivityIndicator color="black" /> : <><Download size={20} color="black" className="mr-2" /><Text className="text-black font-bold">Guardar</Text></>}
+              </TouchableOpacity>
+            </View>
+            <TouchableOpacity onPress={resetState} className="h-12 items-center justify-center"><Text className="text-zinc-500 font-bold">Probar otro</Text></TouchableOpacity>
+          </View>
+        </SafeAreaView>
+      </View>
+    );
+  }
+
+  return (
+    <View className="flex-1 bg-[#0f0f0f]">
+      {/* ✨ FONDO AMBIENTADO CON BLUR ✨ */}
+      <Image 
+        source={{ uri: backgroundImage }} 
+        className="absolute w-full h-full opacity-60" 
+        blurRadius={20}
+        resizeMode="cover"
+      />
+      <LinearGradient colors={['transparent', '#0f0f0f']} className="absolute w-full h-full" />
+
+      <SafeAreaView className="flex-1 px-6">
+        <View className="flex-row justify-between items-center mb-6">
+          <TouchableOpacity onPress={() => router.back()} className="w-10 h-10 bg-black/40 rounded-full items-center justify-center border border-white/10">
+            <ArrowLeft size={24} color="white" />
+          </TouchableOpacity>
+          <View className="bg-black/40 px-3 py-1 rounded-full border border-white/10">
+            <Text className="text-zinc-300 text-xs font-bold">{price} 💎</Text>
+          </View>
+        </View>
+
+        <Text className="text-white text-3xl font-bold mb-2">{title}</Text>
+        <Text className="text-zinc-300 text-lg mb-8">{subtitle}</Text>
+
+        <View className="flex-1 gap-4">
+          <TouchableOpacity 
+            onPress={() => openPicker('user')}
+            activeOpacity={0.9}
+            className={`flex-1 rounded-3xl border-2 border-dashed relative overflow-hidden bg-black/40 backdrop-blur-xl ${userImage ? 'border-indigo-500' : 'border-white/20'}`}
+          >
+            {userImage ? (
+              <>
+                <Image source={{ uri: userImage }} className="w-full h-full opacity-80" resizeMode="cover" />
+                <View className="absolute top-3 right-3 bg-indigo-500 rounded-full p-1"><CheckCircle2 size={16} color="white" /></View>
+                <View className="absolute bottom-0 w-full bg-black/60 p-2 items-center"><Text className="text-white font-bold text-xs">Tu Foto</Text></View>
+              </>
+            ) : (
+              <View className="items-center justify-center h-full">
+                <View className="w-16 h-16 bg-white/10 rounded-full items-center justify-center mb-3">
+                    <User size={32} color="#a1a1aa" />
+                </View>
+                <Text className="text-white font-bold text-lg">1. Sube tu foto</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+
+          <View className="items-center -my-3 z-10">
+            <View className="bg-transparent p-2 rounded-full">
+               <View className="w-8 h-8 bg-white/20 backdrop-blur-md rounded-full items-center justify-center border border-white/10">
+                  <Text className="text-white font-bold text-lg">+</Text>
+               </View>
+            </View>
+          </View>
+
+          <TouchableOpacity 
+            onPress={() => openPicker('garment')}
+            activeOpacity={0.9}
+            className={`flex-1 rounded-3xl border-2 border-dashed relative overflow-hidden bg-black/40 backdrop-blur-xl ${garmentImage ? 'border-purple-500' : 'border-white/20'}`}
+          >
+            {garmentImage ? (
+              <>
+                <Image source={{ uri: garmentImage }} className="w-full h-full opacity-80" resizeMode="cover" />
+                <View className="absolute top-3 right-3 bg-purple-500 rounded-full p-1"><CheckCircle2 size={16} color="white" /></View>
+                <View className="absolute bottom-0 w-full bg-black/60 p-2 items-center"><Text className="text-white font-bold text-xs">El Outfit</Text></View>
+              </>
+            ) : (
+              <View className="items-center justify-center h-full">
+                <View className="w-16 h-16 bg-white/10 rounded-full items-center justify-center mb-3">
+                    <Shirt size={32} color="#a1a1aa" />
+                </View>
+                <Text className="text-white font-bold text-lg">2. Foto de la ropa</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+        </View>
+
+        <View className="py-6">
+            <TouchableOpacity 
+                disabled={!isReady || isProcessing}
+                onPress={handleGenerate}
+                className={`w-full h-16 rounded-2xl flex-row items-center justify-center shadow-lg 
+                    ${isReady ? 'bg-indigo-500 shadow-indigo-500/40' : 'bg-white/10 opacity-50'}`}
+            >
+                {isProcessing ? (
+                    <>
+                        <ActivityIndicator color="white" className="mr-3" />
+                        <Text className="text-white font-bold text-lg">Probando ropa...</Text>
+                    </>
+                ) : (
+                    <>
+                        <Sparkles size={24} color={isReady ? "white" : "#71717a"} className="mr-3" />
+                        <Text className={`font-bold text-lg ${isReady ? 'text-white' : 'text-zinc-400'}`}>
+                            {isReady ? "Generar Virtual Try On" : "Sube ambas fotos"}
+                        </Text>
+                    </>
+                )}
+            </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+
+      <Modal visible={showSelectionModal} transparent animationType="slide">
+         <TouchableOpacity style={{flex:1}} activeOpacity={1} onPress={() => setShowSelectionModal(false)}>
+             <View className="flex-1 bg-black/60 justify-end">
+                <View className="bg-[#1c1c1e] rounded-t-[32px] p-6 pb-12 border-t border-white/10">
+                   <Text className="text-white text-xl font-bold text-center mb-6">Seleccionar Imagen</Text>
+                   <TouchableOpacity onPress={() => pickImage(true)} className="bg-zinc-800 p-4 rounded-2xl mb-3 flex-row items-center"><Camera size={20} color="white" className="mr-4"/><Text className="text-white font-bold">Cámara</Text></TouchableOpacity>
+                   <TouchableOpacity onPress={() => pickImage(false)} className="bg-zinc-800 p-4 rounded-2xl mb-6 flex-row items-center"><Download size={20} color="white" className="mr-4"/><Text className="text-white font-bold">Galería</Text></TouchableOpacity>
+                   <TouchableOpacity onPress={() => setShowSelectionModal(false)} className="py-3 items-center"><Text className="text-zinc-400">Cancelar</Text></TouchableOpacity>
+                </View>
+             </View>
+         </TouchableOpacity>
+      </Modal>
+    </View>
+  );
+}

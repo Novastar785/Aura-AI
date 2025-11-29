@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, Image, TouchableOpacity, Dimensions, StatusBar, Alert } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Sparkles, Plus, Wallet, User, Image as ImageIcon } from 'lucide-react-native';
-import { useRouter } from 'expo-router';
-import { cssInterop } from "nativewind";
 import * as MediaLibrary from 'expo-media-library';
+import { useRouter } from 'expo-router';
+import { Plus, Sparkles, User, Wallet } from 'lucide-react-native';
+import { cssInterop } from "nativewind";
+import React, { useEffect, useState } from 'react';
+import { Alert, Dimensions, Image, ScrollView, StatusBar, Text, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 cssInterop(LinearGradient, {
   className: "style",
@@ -15,23 +15,50 @@ const { width } = Dimensions.get('window');
 
 // --- 1. CONFIGURACIÓN DE RUTAS ---
 const TOOLS = [
-  { 
-    id: 'headshot', 
-    route: '/features/headshot', 
-    title: 'Instant Headshot', 
-    subtitle: 'Foto profesional LinkedIn', 
+   { 
+    id: 'tryon', 
+    route: '/features/tryon', 
+    title: 'Virtual Try-On', 
+    subtitle: 'Try on Any outfit', 
     price: '20', 
-    image: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=600&q=80', 
-    badge: 'POPULAR' 
+    image: 'https://rizzflows.com/img_aura/Vtryon.png', 
+    badge: 'FUN' 
   },
   { 
     id: 'stylist', 
     route: '/features/stylist', 
-    title: 'Virtual Stylist', 
-    subtitle: 'Cambio de Outfit IA', 
+    title: 'Change your Style', 
+    subtitle: 'Your vide your style', 
     price: '15', 
-    image: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&q=80', 
+    image: 'https://rizzflows.com/img_aura/Image_fx(3).png', 
     badge: 'TRENDING' 
+  },
+  { 
+    id: 'hairstudio', 
+    route: '/features/hairstudio', 
+    title: 'Hair Studio', 
+    subtitle: 'Prueba nuevos colores y cortes', 
+    price: '15', 
+    image: 'https://rizzflows.com/img_aura/Image_fx(13).png', 
+    badge: 'NEW' 
+  },
+   { 
+    id: 'fitness', 
+    route: '/features/fitness', 
+    title: 'Fitness Body', 
+    subtitle: 'Tu versión más atlética', 
+    price: '20', 
+    image: 'https://rizzflows.com/img_aura/Image_fx(14).png', 
+    badge: '' 
+  },
+    { 
+    id: 'glowup', 
+    route: '/features/glowup', 
+    title: 'Glow Up', 
+    subtitle: 'Mejora estética natural', 
+    price: '10', 
+    image: 'https://rizzflows.com/img_aura/Image_fx(8).png', 
+    badge: '' 
   },
   { 
     id: 'luxury', 
@@ -40,17 +67,8 @@ const TOOLS = [
     subtitle: 'Estilo de vida millonario', 
     price: '25', 
     // NUEVA IMAGEN: Interior de auto de lujo (Más confiable)
-    image: 'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=600&q=80', 
+    image: 'https://rizzflows.com/img_aura/bmw%20rojo.jpg', 
     badge: 'VIRAL' 
-  },
-  { 
-    id: 'glowup', 
-    route: '/features/glowup', 
-    title: 'Glow Up', 
-    subtitle: 'Mejora estética natural', 
-    price: '10', 
-    image: 'https://images.unsplash.com/photo-1616766098956-c81f12114571?w=600&q=80', 
-    badge: '' 
   },
   { 
     id: 'socials', 
@@ -58,17 +76,26 @@ const TOOLS = [
     title: 'Socials Saver', 
     subtitle: 'Fotos casuales atractivas', 
     price: '15', 
-    image: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=600&q=80', 
+    image: 'https://rizzflows.com/img_aura/Image_fx(10).png', 
     badge: '' 
   },
-  { 
-    id: 'retro', 
-    route: '/features/retro', 
-    title: 'Time Traveler', 
-    subtitle: 'Estilos retro 90s/80s', 
+    { 
+    id: 'globetrotter', 
+    route: '/features/globetrotter', 
+    title: 'Globetrotter', 
+    subtitle: 'Viaja por el mundo', 
     price: '20', 
-    image: 'https://images.unsplash.com/photo-1550254478-ead40cc54513?w=600&q=80', 
-    badge: 'FUN' 
+    image: 'https://rizzflows.com/img_aura/Image_fx(12).png', 
+    badge: 'NEW' 
+  }, 
+  { 
+    id: 'headshot', 
+    route: '/features/headshot', 
+    title: 'Instant Headshot', 
+    subtitle: 'Foto profesional LinkedIn', 
+    price: '20', 
+    image: 'https://rizzflows.com/img_aura/Image_fx(1).png', 
+    badge: 'POPULAR' 
   },
 ];
 

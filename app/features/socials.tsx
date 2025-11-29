@@ -7,7 +7,7 @@ export default function StylistScreen() {
       title="Socials Saver"
       subtitle="potencia tus redes con fotos de perfil que se ven naturales"
       price={15}
-      backgroundImage="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=600&q=80"
+      backgroundImage="https://rizzflows.com/img_aura/Image_fx(10).png"
       apiMode="socials"
     />
   );
