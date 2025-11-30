@@ -1,10 +1,11 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import * as MediaLibrary from 'expo-media-library';
 import { useRouter } from 'expo-router';
-import { Plus, Sparkles, User, Wallet } from 'lucide-react-native';
+import { Plus, Sparkles } from 'lucide-react-native';
 import { cssInterop } from "nativewind";
 import React, { useEffect, useState } from 'react';
-import { Alert, Dimensions, Image, ScrollView, StatusBar, Text, TouchableOpacity, View } from 'react-native';
+import { useTranslation } from 'react-i18next'; // ✨ Import i18n
+import { Dimensions, Image, ScrollView, StatusBar, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 cssInterop(LinearGradient, {
@@ -13,106 +14,105 @@ cssInterop(LinearGradient, {
 
 const { width } = Dimensions.get('window');
 
-// --- 1. CONFIGURACIÓN DE RUTAS ---
-const TOOLS = [
-   { 
-    id: 'tryon', 
-    route: '/features/tryon', 
-    title: 'Virtual Try-On', 
-    subtitle: 'Try on Any outfit', 
-    price: '20', 
-    image: 'https://rizzflows.com/img_aura/Vtryon.png', 
-    badge: 'FUN' 
-  },
-  { 
-    id: 'stylist', 
-    route: '/features/stylist', 
-    title: 'Change your Style', 
-    subtitle: 'Your vide your style', 
-    price: '15', 
-    image: 'https://rizzflows.com/img_aura/Image_fx(3).png', 
-    badge: 'TRENDING' 
-  },
-  { 
-    id: 'hairstudio', 
-    route: '/features/hairstudio', 
-    title: 'Hair Studio', 
-    subtitle: 'Prueba nuevos colores y cortes', 
-    price: '15', 
-    image: 'https://rizzflows.com/img_aura/Image_fx(13).png', 
-    badge: 'NEW' 
-  },
-   { 
-    id: 'fitness', 
-    route: '/features/fitness', 
-    title: 'Fitness Body', 
-    subtitle: 'Tu versión más atlética', 
-    price: '20', 
-    image: 'https://rizzflows.com/img_aura/Image_fx(14).png', 
-    badge: '' 
-  },
-    { 
-    id: 'glowup', 
-    route: '/features/glowup', 
-    title: 'Glow Up', 
-    subtitle: 'Mejora estética natural', 
-    price: '10', 
-    image: 'https://rizzflows.com/img_aura/Image_fx(8).png', 
-    badge: '' 
-  },
-  { 
-    id: 'luxury', 
-    route: '/features/luxury', 
-    title: 'Luxury Flex', 
-    subtitle: 'Estilo de vida millonario', 
-    price: '25', 
-    // NUEVA IMAGEN: Interior de auto de lujo (Más confiable)
-    image: 'https://rizzflows.com/img_aura/bmw%20rojo.jpg', 
-    badge: 'VIRAL' 
-  },
-  { 
-    id: 'socials', 
-    route: '/features/socials', 
-    title: 'Socials Saver', 
-    subtitle: 'Fotos casuales atractivas', 
-    price: '15', 
-    image: 'https://rizzflows.com/img_aura/Image_fx(10).png', 
-    badge: '' 
-  },
-    { 
-    id: 'globetrotter', 
-    route: '/features/globetrotter', 
-    title: 'Globetrotter', 
-    subtitle: 'Viaja por el mundo', 
-    price: '20', 
-    image: 'https://rizzflows.com/img_aura/Image_fx(12).png', 
-    badge: 'NEW' 
-  }, 
-  { 
-    id: 'headshot', 
-    route: '/features/headshot', 
-    title: 'Instant Headshot', 
-    subtitle: 'Foto profesional LinkedIn', 
-    price: '20', 
-    image: 'https://rizzflows.com/img_aura/Image_fx(1).png', 
-    badge: 'POPULAR' 
-  },
-];
-
-// --- 2. DATOS DE RELLENO (PLACEHOLDERS) ---
 const PLACEHOLDER_GALLERY = [
-  { id: 'p1', uri: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&q=80', type: 'Ejemplo' },
-  { id: 'p2', uri: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&q=80', type: 'Ejemplo' },
-  { id: 'p3', uri: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&q=80', type: 'Ejemplo' },
-  { id: 'p4', uri: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&q=80', type: 'Ejemplo' },
+  { id: 'p1', uri: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&q=80' },
+  { id: 'p2', uri: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&q=80' },
+  { id: 'p3', uri: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&q=80' },
+  { id: 'p4', uri: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&q=80' },
 ];
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { t } = useTranslation(); // ✨ Hook
   
   const [galleryPhotos, setGalleryPhotos] = useState<any[]>([]);
   const [hasPermission, setHasPermission] = useState<boolean>(false);
+
+  // --- CONFIGURACIÓN DE RUTAS DINÁMICA (PARA TRADUCCIONES) ---
+  const TOOLS = [
+    { 
+     id: 'tryon', 
+     route: '/features/tryon', 
+     title: t('tools.tryon.title'), 
+     subtitle: t('tools.tryon.subtitle'), 
+     price: '20', 
+     image: 'https://rizzflows.com/img_aura/Vtryon.png', 
+     badge: 'FUN' 
+   },
+   { 
+     id: 'stylist', 
+     route: '/features/stylist', 
+     title: t('tools.stylist.title'), 
+     subtitle: t('tools.stylist.subtitle'), 
+     price: '15', 
+     image: 'https://rizzflows.com/img_aura/Image_fx(3).png', 
+     badge: 'TRENDING' 
+   },
+   { 
+     id: 'hairstudio', 
+     route: '/features/hairstudio', 
+     title: t('tools.hairstudio.title'), 
+     subtitle: t('tools.hairstudio.subtitle'), 
+     price: '15', 
+     image: 'https://rizzflows.com/img_aura/Image_fx(13).png', 
+     badge: 'NEW' 
+   },
+    { 
+     id: 'fitness', 
+     route: '/features/fitness', 
+     title: t('tools.fitness.title'), 
+     subtitle: t('tools.fitness.subtitle'), 
+     price: '20', 
+     image: 'https://rizzflows.com/img_aura/Image_fx(14).png', 
+     badge: '' 
+   },
+     { 
+     id: 'glowup', 
+     route: '/features/glowup', 
+     title: t('tools.glowup.title'), 
+     subtitle: t('tools.glowup.subtitle'), 
+     price: '10', 
+     image: 'https://rizzflows.com/img_aura/Image_fx(8).png', 
+     badge: '' 
+   },
+   { 
+     id: 'luxury', 
+     route: '/features/luxury', 
+     title: t('tools.luxury.title'), 
+     subtitle: t('tools.luxury.subtitle'), 
+     price: '25', 
+     image: 'https://rizzflows.com/img_aura/bmw%20rojo.jpg', 
+     badge: 'VIRAL' 
+   },
+   { 
+     id: 'socials', 
+     route: '/features/socials', 
+     title: t('tools.socials.title'), 
+     subtitle: t('tools.socials.subtitle'), 
+     price: '15', 
+     image: 'https://rizzflows.com/img_aura/Image_fx(10).png', 
+     badge: '' 
+   },
+     { 
+     id: 'globetrotter', 
+     route: '/features/globetrotter', 
+     title: t('tools.globetrotter.title'), 
+     subtitle: t('tools.globetrotter.subtitle'), 
+     price: '20', 
+     image: 'https://rizzflows.com/img_aura/Image_fx(12).png', 
+     badge: 'NEW' 
+   }, 
+   { 
+     id: 'headshot', 
+     route: '/features/headshot', 
+     title: t('tools.headshot.title'), 
+     subtitle: t('tools.headshot.subtitle'), 
+     price: '20', 
+     image: 'https://rizzflows.com/img_aura/Image_fx(1).png', 
+     badge: 'POPULAR' 
+   },
+ ];
 
   useEffect(() => {
     (async () => {
@@ -164,7 +164,7 @@ export default function HomeScreen() {
           <View className="flex-row justify-between items-center px-6 pt-2 mb-8">
             <View>
               <Text className="text-zinc-500 text-xs font-medium tracking-widest uppercase mb-1">AURA AI</Text>
-              <Text className="text-white text-3xl font-bold">Tu Mejor Versión</Text>
+              <Text className="text-white text-3xl font-bold">{t('home.subtitle')}</Text>
             </View>
             <TouchableOpacity className="flex-row items-center bg-zinc-800/80 px-3 py-1.5 rounded-full border border-zinc-700">
               <View className="w-2 h-2 rounded-full bg-purple-500 mr-2 shadow-lg shadow-purple-500" />
@@ -178,9 +178,9 @@ export default function HomeScreen() {
             <View className="flex-row justify-between items-center px-6 mb-4">
               <View className="flex-row items-center gap-2">
                 <Sparkles size={16} color="#fbbf24" />
-                <Text className="text-white font-bold text-lg">HERRAMIENTAS IA</Text>
+                <Text className="text-white font-bold text-lg">{t('home.tools_header')}</Text>
               </View>
-              <Text className="text-zinc-500 text-xs">Desliza →</Text>
+              <Text className="text-zinc-500 text-xs">{t('home.swipe')}</Text>
             </View>
 
             <ScrollView 
@@ -212,7 +212,7 @@ export default function HomeScreen() {
                     <Text className="text-zinc-300 text-sm mb-5 font-medium">{item.subtitle}</Text>
                     
                     <View className="bg-white/10 backdrop-blur-md self-start px-5 py-3 rounded-2xl flex-row items-center border border-white/20">
-                      <Text className="text-white font-bold mr-2">Empezar</Text>
+                      <Text className="text-white font-bold mr-2">{t('tools.start_btn')}</Text>
                       <View className="bg-black/40 px-2 py-0.5 rounded-md">
                          <Text className="text-zinc-200 text-xs font-bold">{item.price} 💎</Text>
                       </View>
@@ -227,14 +227,14 @@ export default function HomeScreen() {
           <View className="px-6">
             <View className="flex-row justify-between items-center mb-4">
               <View className="flex-row items-center gap-2">
-                <Text className="text-zinc-200 font-bold text-lg">TUS CREACIONES</Text>
+                <Text className="text-zinc-200 font-bold text-lg">{t('home.gallery_header')}</Text>
                 {!isShowingPlaceholders && (
                   <View className="bg-zinc-800 px-2 py-0.5 rounded-md">
                     <Text className="text-zinc-400 text-xs">{galleryPhotos.length}</Text>
                   </View>
                 )}
               </View>
-              <Text className="text-zinc-400 text-sm">Ver todo</Text>
+              <Text className="text-zinc-400 text-sm">{t('home.see_all')}</Text>
             </View>
             
             <View className="flex-row flex-wrap justify-between">
@@ -248,7 +248,7 @@ export default function HomeScreen() {
                   
                   {isShowingPlaceholders && (
                      <View className="absolute top-3 right-3 bg-black/40 backdrop-blur-md px-2 py-1 rounded-lg border border-white/10">
-                        <Text className="text-white text-[10px] font-medium tracking-wide">Ejemplo</Text>
+                        <Text className="text-white text-[10px] font-medium tracking-wide">{t('home.example_tag')}</Text>
                      </View>
                   )}
                 </View>
@@ -257,47 +257,11 @@ export default function HomeScreen() {
 
             {isShowingPlaceholders && (
                <Text className="text-zinc-600 text-xs text-center mt-2 italic">
-                  Tus futuras obras maestras aparecerán aquí.
+                  {t('home.empty_gallery')}
                </Text>
             )}
           </View>
-        </ScrollView>
-
-        {/* BOTTOM NAV + HOME RESET */}
-        <View 
-          className="absolute bottom-0 w-full bg-[#0f0f0f]/95 border-t border-white/5 flex-row justify-between px-10 pt-4 z-10"
-          style={{ paddingBottom: Math.max(insets.bottom, 20) }}
-        >
-          <TouchableOpacity className="items-center opacity-60 p-2">
-              <Wallet size={24} color="white"/>
-              <Text className="text-[10px] text-white mt-1 font-medium">Tienda</Text>
-          </TouchableOpacity>
-          <View className="w-20" />
-          <TouchableOpacity className="items-center opacity-60 p-2">
-              <User size={24} color="white"/>
-              <Text className="text-[10px] text-white mt-1 font-medium">Perfil</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View 
-          className="absolute left-0 right-0 items-center justify-center z-50 pointer-events-box-none"
-          style={{ bottom: insets.bottom + 30 }}
-        >
-           <View className="absolute w-20 h-20 bg-indigo-500/40 rounded-full blur-2xl" />
-           <TouchableOpacity 
-             activeOpacity={0.9}
-             onPress={() => Alert.alert("Home", "Ya estás en el inicio")}
-             className="w-18 h-18 rounded-full items-center justify-center shadow-2xl shadow-indigo-500/50"
-             style={{ width: 72, height: 72, elevation: 10 }}
-           >
-              <LinearGradient
-                colors={['#e0e7ff', '#818cf8']}
-                className="w-full h-full rounded-full items-center justify-center border-4 border-white/10"
-              >
-                <Sparkles size={32} color="#312e81" fill="#312e81" />
-              </LinearGradient>
-           </TouchableOpacity>
-        </View>
+        </ScrollView>       
       </View>
     </View>
   );

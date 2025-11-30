@@ -9,6 +9,7 @@ import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Image, Modal, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 // Importamos la función de IA desde la ruta correcta (src/services)
+import { useTranslation } from 'react-i18next'; // ✨
 import { generateAIImage } from '../src/services/gemini';
 
 // Definición de una Opción Visual (Tarjeta)
@@ -30,6 +31,7 @@ interface ToolProps {
 
 export default function GenericToolScreen({ title, subtitle, price, backgroundImage, apiMode, options }: ToolProps) {
   const router = useRouter();
+  const { t } = useTranslation(); // ✨
   
   // --- ESTADOS ---
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -67,7 +69,7 @@ export default function GenericToolScreen({ title, subtitle, price, backgroundIm
       : await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (permissionResult.status !== 'granted') {
-      return Alert.alert("Faltan permisos", "Necesitamos acceso para continuar.");
+      return Alert.alert(t('common.permissions_missing'), t('common.permissions_access'));
     }
 
     // Nombramos 'pickerOptions' para no confundir con las 'options' de estilos
@@ -90,7 +92,7 @@ export default function GenericToolScreen({ title, subtitle, price, backgroundIm
   const handleGenerate = async () => {
     if (!selectedImage) return;
     setIsProcessing(true);
-    setLoadingStage("Generando magia..."); 
+    setLoadingStage(t('common.generating')); 
     
     try {
       // Enviamos la imagen, el modo base y la variante seleccionada (si hay)
@@ -99,11 +101,11 @@ export default function GenericToolScreen({ title, subtitle, price, backgroundIm
       if (generatedImageBase64) {
         setResultImage(generatedImageBase64);
       } else {
-        Alert.alert("Error", "El modelo no pudo generar la imagen. Intenta de nuevo.");
+        Alert.alert(t('common.error'), t('common.error_generation'));
       }
     } catch (error) {
       console.error(error);
-      Alert.alert("Error IA", "Hubo un problema técnico.");
+      Alert.alert(t('common.error'), t('common.error_technical'));
     } finally {
       setIsProcessing(false);
       setLoadingStage("");
@@ -115,7 +117,7 @@ export default function GenericToolScreen({ title, subtitle, price, backgroundIm
     setIsSaving(true);
     try {
       const { status } = await MediaLibrary.requestPermissionsAsync();
-      if (status !== 'granted') return Alert.alert("Permiso denegado");
+      if (status !== 'granted') return Alert.alert(t('common.permission_denied'));
       
       const directory = FileSystem.cacheDirectory;
       const filename = directory + `aura_ai_${Date.now()}.png`;
@@ -128,8 +130,8 @@ export default function GenericToolScreen({ title, subtitle, price, backgroundIm
       if (album) { await MediaLibrary.addAssetsToAlbumAsync([asset], album, false); } 
       else { await MediaLibrary.createAlbumAsync('Aura AI', asset, false); }
       
-      Alert.alert("✅ Guardado", "Foto guardada en el álbum 'Aura AI'.");
-    } catch (error: any) { Alert.alert("Error", error.message); } finally { setIsSaving(false); }
+      Alert.alert(t('common.saved'), t('common.saved_msg_album'));
+    } catch (error: any) { Alert.alert(t('common.error'), error.message); } finally { setIsSaving(false); }
   };
 
   const handleShare = async () => {
@@ -142,7 +144,7 @@ export default function GenericToolScreen({ title, subtitle, price, backgroundIm
       await FileSystem.writeAsStringAsync(filename, base64Code, { encoding: 'base64' });
       
       if (await Sharing.isAvailableAsync()) { await Sharing.shareAsync(filename); }
-    } catch (error) { Alert.alert("Error", "No se pudo compartir."); } finally { setIsSharing(false); }
+    } catch (error) { Alert.alert(t('common.error'), t('common.share_error')); } finally { setIsSharing(false); }
   };
 
   // --- RENDERIZADO: PANTALLA DE RESULTADO ---
@@ -154,21 +156,21 @@ export default function GenericToolScreen({ title, subtitle, price, backgroundIm
         <SafeAreaView className="flex-1 justify-between px-6 pb-8">
           <View className="items-end pt-4">
             <View className="bg-indigo-500 px-3 py-1 rounded-full shadow-lg">
-               <Text className="text-white font-bold text-xs">✨ IA GENERADA</Text>
+               <Text className="text-white font-bold text-xs">{t('common.ia_generated')}</Text>
             </View>
           </View>
           <View>
-            <Text className="text-white text-3xl font-bold text-center mb-2">¡Tu Nuevo Look!</Text>
+            <Text className="text-white text-3xl font-bold text-center mb-2">{t('generic_tool.result_title')}</Text>
             <View className="flex-row gap-4 mb-4">
               <TouchableOpacity onPress={handleShare} disabled={isSharing} className="flex-1 h-14 bg-zinc-800 rounded-2xl justify-center items-center border border-white/10">
-                 {isSharing ? <ActivityIndicator color="white" /> : <><Share2 size={20} color="white" className="mr-2" /><Text className="text-white font-bold">Compartir</Text></>}
+                 {isSharing ? <ActivityIndicator color="white" /> : <><Share2 size={20} color="white" className="mr-2" /><Text className="text-white font-bold">{t('common.share')}</Text></>}
               </TouchableOpacity>
               <TouchableOpacity onPress={handleSave} disabled={isSaving} className="flex-1 h-14 bg-white rounded-2xl justify-center items-center shadow-lg">
-                 {isSaving ? <ActivityIndicator color="black" /> : <><Download size={20} color="black" className="mr-2" /><Text className="text-black font-bold">Guardar</Text></>}
+                 {isSaving ? <ActivityIndicator color="black" /> : <><Download size={20} color="black" className="mr-2" /><Text className="text-black font-bold">{t('common.save')}</Text></>}
               </TouchableOpacity>
             </View>
             <TouchableOpacity onPress={resetState} className="h-12 items-center justify-center">
-               <Text className="text-zinc-500 font-bold">Probar otra vez</Text>
+               <Text className="text-zinc-500 font-bold">{t('generic_tool.try_again')}</Text>
             </TouchableOpacity>
           </View>
         </SafeAreaView>
@@ -197,7 +199,7 @@ export default function GenericToolScreen({ title, subtitle, price, backgroundIm
           {selectedImage && (
              <TouchableOpacity onPress={() => setSelectedImage(null)} className="bg-black/40 px-3 py-1 rounded-full border border-white/10 flex-row items-center">
                 <X size={14} color="white" className="mr-1"/>
-                <Text className="text-white text-xs font-bold">Cancelar</Text>
+                <Text className="text-white text-xs font-bold">{t('common.cancel')}</Text>
              </TouchableOpacity>
           )}
         </View>
@@ -207,7 +209,7 @@ export default function GenericToolScreen({ title, subtitle, price, backgroundIm
             // ESTADO 1: ANTES DE SUBIR FOTO
             <>
               <View className="bg-rose-500 self-start px-3 py-1 rounded-full mb-4 shadow-lg">
-                <Text className="text-white text-xs font-bold">POPULAR</Text>
+                <Text className="text-white text-xs font-bold">{t('common.popular')}</Text>
               </View>
               <Text className="text-white text-4xl font-bold mb-2">{title}</Text>
               <Text className="text-zinc-400 text-lg mb-8">{subtitle}</Text>
@@ -216,19 +218,19 @@ export default function GenericToolScreen({ title, subtitle, price, backgroundIm
                 onPress={() => setShowSelectionModal(true)}
               >
                 <Camera size={24} color="white" className="mr-3" />
-                <Text className="text-white font-bold text-lg">Subir Foto ({price} 💎)</Text>
+                <Text className="text-white font-bold text-lg">{t('common.upload_photo')} ({price} 💎)</Text>
               </TouchableOpacity>
             </>
           ) : (
             // ESTADO 2: FOTO LISTA, ELIGIENDO ESTILO
             <View className="bg-black/80 p-6 rounded-3xl border border-white/10 backdrop-blur-xl">
-                <Text className="text-white text-xl font-bold mb-1 text-center">Foto seleccionada</Text>
-                <Text className="text-zinc-400 text-sm mb-6 text-center">Listo para procesar.</Text>
+                <Text className="text-white text-xl font-bold mb-1 text-center">{t('generic_tool.photo_selected')}</Text>
+                <Text className="text-zinc-400 text-sm mb-6 text-center">{t('generic_tool.ready_process')}</Text>
 
                 {/* --- SECCIÓN DE TARJETAS DE ESTILO (NUEVO) --- */}
                 {options && (
                   <View className="mb-6">
-                    <Text className="text-zinc-500 text-xs font-bold mb-3 uppercase tracking-widest ml-1">Elige un estilo</Text>
+                    <Text className="text-zinc-500 text-xs font-bold mb-3 uppercase tracking-widest ml-1">{t('generic_tool.choose_style')}</Text>
                     <ScrollView 
                       horizontal 
                       showsHorizontalScrollIndicator={false} 
@@ -286,9 +288,9 @@ export default function GenericToolScreen({ title, subtitle, price, backgroundIm
                   disabled={isProcessing}
                 >
                   {isProcessing ? (
-                     <><ActivityIndicator color="white" className="mr-3" /><Text className="text-zinc-300 font-bold text-xs">{loadingStage || "Procesando..."}</Text></>
+                     <><ActivityIndicator color="white" className="mr-3" /><Text className="text-zinc-300 font-bold text-xs">{loadingStage || t('common.processing')}</Text></>
                   ) : (
-                    <><Sparkles size={24} color="white" className="mr-3" /><Text className="text-white font-bold text-lg">Generar con IA</Text></>
+                    <><Sparkles size={24} color="white" className="mr-3" /><Text className="text-white font-bold text-lg">{t('generic_tool.generate_btn')}</Text></>
                   )}
                 </TouchableOpacity>
             </View>
@@ -299,18 +301,18 @@ export default function GenericToolScreen({ title, subtitle, price, backgroundIm
       <Modal visible={showSelectionModal} transparent animationType="fade">
          <View className="flex-1 bg-black/80 justify-end">
             <View className="bg-[#1c1c1e] rounded-t-[32px] p-6 pb-12 border-t border-white/10">
-               <Text className="text-white text-xl font-bold text-center mb-2">Subir Foto</Text>
-               <Text className="text-zinc-500 text-center mb-8">Elige el origen</Text>
+               <Text className="text-white text-xl font-bold text-center mb-2">{t('common.upload_photo')}</Text>
+               <Text className="text-zinc-500 text-center mb-8">{t('common.choose_source')}</Text>
                <TouchableOpacity onPress={() => pickImage(true)} className="bg-zinc-800 p-4 rounded-2xl mb-3 flex-row items-center border border-white/5">
                   <View className="w-10 h-10 bg-indigo-500/20 rounded-full items-center justify-center mr-4"><Camera size={20} color="#818cf8" /></View>
-                  <Text className="text-white font-bold text-lg">Cámara</Text>
+                  <Text className="text-white font-bold text-lg">{t('common.camera')}</Text>
                </TouchableOpacity>
                <TouchableOpacity onPress={() => pickImage(false)} className="bg-zinc-800 p-4 rounded-2xl mb-6 flex-row items-center border border-white/5">
                   <View className="w-10 h-10 bg-purple-500/20 rounded-full items-center justify-center mr-4"><ImageIcon size={20} color="#c084fc" /></View>
-                  <Text className="text-white font-bold text-lg">Galería</Text>
+                  <Text className="text-white font-bold text-lg">{t('common.gallery')}</Text>
                </TouchableOpacity>
                <TouchableOpacity onPress={() => setShowSelectionModal(false)} className="py-3 items-center">
-                  <Text className="text-zinc-400 font-bold">Cancelar</Text>
+                  <Text className="text-zinc-400 font-bold">{t('common.cancel')}</Text>
                </TouchableOpacity>
             </View>
          </View>

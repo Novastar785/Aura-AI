@@ -6,6 +6,7 @@ import { useRouter } from 'expo-router';
 import * as Sharing from 'expo-sharing';
 import { ArrowLeft, Camera, CheckCircle2, Download, Share2, Shirt, Sparkles, User } from 'lucide-react-native';
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next'; // ✨
 import { ActivityIndicator, Alert, Image, Modal, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { generateAIImage } from '../src/services/gemini';
@@ -19,6 +20,7 @@ interface TryOnProps {
 
 export default function TryOnToolScreen({ title, subtitle, price, backgroundImage }: TryOnProps) {
   const router = useRouter();
+  const { t } = useTranslation(); // ✨
   
   // --- ESTADOS PARA LAS 2 IMÁGENES ---
   const [userImage, setUserImage] = useState<string | null>(null);
@@ -43,7 +45,7 @@ export default function TryOnToolScreen({ title, subtitle, price, backgroundImag
       : await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (permissionResult.status !== 'granted') {
-      return Alert.alert("Faltan permisos", "Necesitamos acceso.");
+      return Alert.alert(t('common.permissions_missing'), t('common.permissions_access'));
     }
 
     const options: ImagePicker.ImagePickerOptions = {
@@ -75,9 +77,9 @@ export default function TryOnToolScreen({ title, subtitle, price, backgroundImag
     try {
       const generated = await generateAIImage(userImage, 'tryon', null, garmentImage);
       if (generated) setResultImage(generated);
-      else Alert.alert("Error", "No se pudo generar.");
+      else Alert.alert(t('common.error'), t('common.error_generation'));
     } catch (e) {
-      Alert.alert("Error", "Falló la conexión.");
+      Alert.alert(t('common.error'), t('common.error_connection'));
     } finally {
       setIsProcessing(false);
     }
@@ -94,13 +96,13 @@ export default function TryOnToolScreen({ title, subtitle, price, backgroundImag
     setIsSaving(true);
     try {
       const { status } = await MediaLibrary.requestPermissionsAsync();
-      if (status !== 'granted') return Alert.alert("Permiso denegado");
+      if (status !== 'granted') return Alert.alert(t('common.permission_denied'));
       const filename = FileSystem.cacheDirectory + `aura_tryon_${Date.now()}.png`;
       const base64Code = resultImage.includes('base64,') ? resultImage.split('base64,')[1] : resultImage;
       await FileSystem.writeAsStringAsync(filename, base64Code, { encoding: 'base64' });
       await MediaLibrary.createAssetAsync(filename);
-      Alert.alert("✅ Guardado", "Imagen guardada.");
-    } catch (error) { Alert.alert("Error", "No se pudo guardar."); } finally { setIsSaving(false); }
+      Alert.alert(t('common.saved'), t('common.saved_msg'));
+    } catch (error) { Alert.alert(t('common.error'), t('common.error_technical')); } finally { setIsSaving(false); }
   };
 
   const handleShare = async () => {
@@ -111,7 +113,7 @@ export default function TryOnToolScreen({ title, subtitle, price, backgroundImag
         const base64Code = resultImage.includes('base64,') ? resultImage.split('base64,')[1] : resultImage;
         await FileSystem.writeAsStringAsync(filename, base64Code, { encoding: 'base64' });
         if (await Sharing.isAvailableAsync()) { await Sharing.shareAsync(filename); }
-    } catch (error) { Alert.alert("Error", "No se pudo compartir."); } finally { setIsSharing(false); }
+    } catch (error) { Alert.alert(t('common.error'), t('common.share_error')); } finally { setIsSharing(false); }
   };
 
   if (resultImage) {
@@ -122,16 +124,16 @@ export default function TryOnToolScreen({ title, subtitle, price, backgroundImag
         <SafeAreaView className="flex-1 justify-between px-6 pb-8">
           <View className="items-end pt-4"><View className="bg-purple-600 px-3 py-1 rounded-full border border-white/20"><Text className="text-white font-bold text-xs">VIRTUAL TRY ON ✨</Text></View></View>
           <View>
-            <Text className="text-white text-3xl font-bold text-center mb-6">¡Outfit Probado!</Text>
+            <Text className="text-white text-3xl font-bold text-center mb-6">{t('tryon_tool.result_title')}</Text>
             <View className="flex-row gap-4 mb-4">
               <TouchableOpacity onPress={handleShare} disabled={isSharing} className="flex-1 h-14 bg-zinc-800 rounded-2xl justify-center items-center border border-white/10">
-                 {isSharing ? <ActivityIndicator color="white" /> : <><Share2 size={20} color="white" className="mr-2" /><Text className="text-white font-bold">Compartir</Text></>}
+                 {isSharing ? <ActivityIndicator color="white" /> : <><Share2 size={20} color="white" className="mr-2" /><Text className="text-white font-bold">{t('common.share')}</Text></>}
               </TouchableOpacity>
               <TouchableOpacity onPress={handleSave} disabled={isSaving} className="flex-1 h-14 bg-white rounded-2xl justify-center items-center shadow-lg">
-                 {isSaving ? <ActivityIndicator color="black" /> : <><Download size={20} color="black" className="mr-2" /><Text className="text-black font-bold">Guardar</Text></>}
+                 {isSaving ? <ActivityIndicator color="black" /> : <><Download size={20} color="black" className="mr-2" /><Text className="text-black font-bold">{t('common.save')}</Text></>}
               </TouchableOpacity>
             </View>
-            <TouchableOpacity onPress={resetState} className="h-12 items-center justify-center"><Text className="text-zinc-500 font-bold">Probar otro</Text></TouchableOpacity>
+            <TouchableOpacity onPress={resetState} className="h-12 items-center justify-center"><Text className="text-zinc-500 font-bold">{t('tryon_tool.try_another')}</Text></TouchableOpacity>
           </View>
         </SafeAreaView>
       </View>
@@ -172,14 +174,14 @@ export default function TryOnToolScreen({ title, subtitle, price, backgroundImag
               <>
                 <Image source={{ uri: userImage }} className="w-full h-full opacity-80" resizeMode="cover" />
                 <View className="absolute top-3 right-3 bg-indigo-500 rounded-full p-1"><CheckCircle2 size={16} color="white" /></View>
-                <View className="absolute bottom-0 w-full bg-black/60 p-2 items-center"><Text className="text-white font-bold text-xs">Tu Foto</Text></View>
+                <View className="absolute bottom-0 w-full bg-black/60 p-2 items-center"><Text className="text-white font-bold text-xs">{t('tryon_tool.user_photo')}</Text></View>
               </>
             ) : (
               <View className="items-center justify-center h-full">
                 <View className="w-16 h-16 bg-white/10 rounded-full items-center justify-center mb-3">
                     <User size={32} color="#a1a1aa" />
                 </View>
-                <Text className="text-white font-bold text-lg">1. Sube tu foto</Text>
+                <Text className="text-white font-bold text-lg">{t('tryon_tool.step_1')}</Text>
               </View>
             )}
           </TouchableOpacity>
@@ -201,14 +203,14 @@ export default function TryOnToolScreen({ title, subtitle, price, backgroundImag
               <>
                 <Image source={{ uri: garmentImage }} className="w-full h-full opacity-80" resizeMode="cover" />
                 <View className="absolute top-3 right-3 bg-purple-500 rounded-full p-1"><CheckCircle2 size={16} color="white" /></View>
-                <View className="absolute bottom-0 w-full bg-black/60 p-2 items-center"><Text className="text-white font-bold text-xs">El Outfit</Text></View>
+                <View className="absolute bottom-0 w-full bg-black/60 p-2 items-center"><Text className="text-white font-bold text-xs">{t('tryon_tool.outfit_photo')}</Text></View>
               </>
             ) : (
               <View className="items-center justify-center h-full">
                 <View className="w-16 h-16 bg-white/10 rounded-full items-center justify-center mb-3">
                     <Shirt size={32} color="#a1a1aa" />
                 </View>
-                <Text className="text-white font-bold text-lg">2. Foto de la ropa</Text>
+                <Text className="text-white font-bold text-lg">{t('tryon_tool.step_2')}</Text>
               </View>
             )}
           </TouchableOpacity>
@@ -224,13 +226,13 @@ export default function TryOnToolScreen({ title, subtitle, price, backgroundImag
                 {isProcessing ? (
                     <>
                         <ActivityIndicator color="white" className="mr-3" />
-                        <Text className="text-white font-bold text-lg">Probando ropa...</Text>
+                        <Text className="text-white font-bold text-lg">{t('tryon_tool.btn_processing')}</Text>
                     </>
                 ) : (
                     <>
                         <Sparkles size={24} color={isReady ? "white" : "#71717a"} className="mr-3" />
                         <Text className={`font-bold text-lg ${isReady ? 'text-white' : 'text-zinc-400'}`}>
-                            {isReady ? "Generar Virtual Try On" : "Sube ambas fotos"}
+                            {isReady ? t('tryon_tool.btn_ready') : t('tryon_tool.btn_not_ready')}
                         </Text>
                     </>
                 )}
@@ -242,10 +244,10 @@ export default function TryOnToolScreen({ title, subtitle, price, backgroundImag
          <TouchableOpacity style={{flex:1}} activeOpacity={1} onPress={() => setShowSelectionModal(false)}>
              <View className="flex-1 bg-black/60 justify-end">
                 <View className="bg-[#1c1c1e] rounded-t-[32px] p-6 pb-12 border-t border-white/10">
-                   <Text className="text-white text-xl font-bold text-center mb-6">Seleccionar Imagen</Text>
-                   <TouchableOpacity onPress={() => pickImage(true)} className="bg-zinc-800 p-4 rounded-2xl mb-3 flex-row items-center"><Camera size={20} color="white" className="mr-4"/><Text className="text-white font-bold">Cámara</Text></TouchableOpacity>
-                   <TouchableOpacity onPress={() => pickImage(false)} className="bg-zinc-800 p-4 rounded-2xl mb-6 flex-row items-center"><Download size={20} color="white" className="mr-4"/><Text className="text-white font-bold">Galería</Text></TouchableOpacity>
-                   <TouchableOpacity onPress={() => setShowSelectionModal(false)} className="py-3 items-center"><Text className="text-zinc-400">Cancelar</Text></TouchableOpacity>
+                   <Text className="text-white text-xl font-bold text-center mb-6">{t('common.select_image')}</Text>
+                   <TouchableOpacity onPress={() => pickImage(true)} className="bg-zinc-800 p-4 rounded-2xl mb-3 flex-row items-center"><Camera size={20} color="white" className="mr-4"/><Text className="text-white font-bold">{t('common.camera')}</Text></TouchableOpacity>
+                   <TouchableOpacity onPress={() => pickImage(false)} className="bg-zinc-800 p-4 rounded-2xl mb-6 flex-row items-center"><Download size={20} color="white" className="mr-4"/><Text className="text-white font-bold">{t('common.gallery')}</Text></TouchableOpacity>
+                   <TouchableOpacity onPress={() => setShowSelectionModal(false)} className="py-3 items-center"><Text className="text-zinc-400">{t('common.cancel')}</Text></TouchableOpacity>
                 </View>
              </View>
          </TouchableOpacity>

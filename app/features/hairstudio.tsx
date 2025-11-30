@@ -1,57 +1,59 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next'; // ✨
 import GenericToolScreen, { ToolOption } from '../../components/GenericToolScreen';
 
 export default function HairStudioScreen() {
+  const { t } = useTranslation(); // ✨
   
   const options: ToolOption[] = [
     { 
       id: 'butterfly', 
-      label: 'Butterfly Hair Style', 
+      label: t('options.butterfly'), // ✨
       image: 'https://rizzflows.com/img_aura/hairstudio/butterflycut.png' 
     },
     { 
       id: 'layer', 
-      label: 'Layered Hair Style', 
+      label: t('options.layer'), // ✨
       image: 'https://rizzflows.com/img_aura/hairstudio/layered.png' 
     },
     { 
       id: 'bob', 
-      label: 'Corte Bob', 
+      label: t('options.bob'), // ✨
       image: 'https://rizzflows.com/img_aura/hairstudio/bobcut.png' 
     }, 
     { 
       id: 'mullet', 
-      label: 'Moderm Mullet', 
+      label: t('options.mullet'), // ✨
       image: 'https://rizzflows.com/img_aura/hairstudio/modermmullet.png' 
     },
     { 
       id: 'fade', 
-      label: 'Tapper fade', 
+      label: t('options.fade'), // ✨
       image: 'https://rizzflows.com/img_aura/hairstudio/taperfade.png' 
     },
     { 
       id: 'buzzcut', 
-      label: 'Buzz Cut', 
+      label: t('options.buzzcut'), // ✨
       image: 'https://rizzflows.com/img_aura/hairstudio/buzzcut.png' 
     },
     { 
       id: 'blonde', 
-      label: 'Rubio Platino', 
+      label: t('options.blonde'), // ✨
       image: 'https://rizzflows.com/img_aura/hairstudio/blonde.png' 
     },
     { 
       id: 'red', 
-      label: 'Pelirrojo', 
+      label: t('options.red'), // ✨
       image: 'https://rizzflows.com/img_aura/hairstudio/red.png' 
     },
     { 
       id: 'dark', 
-      label: 'Dark Hair', 
+      label: t('options.dark'), // ✨
       image: 'https://rizzflows.com/img_aura/hairstudio/dark.png' 
     },
     { 
       id: 'balayage', 
-      label: 'Balayage', 
+      label: t('options.balayage'), // ✨
       image: 'https://rizzflows.com/img_aura/hairstudio/balayage.png' 
     }, 
    
@@ -59,8 +61,8 @@ export default function HairStudioScreen() {
 
   return (
     <GenericToolScreen 
-      title="Hair Studio"
-      subtitle="Prueba un nuevo look sin ir a la peluquería."
+      title={t('tools.hairstudio.title')} // ✨
+      subtitle={t('feature_descriptions.hairstudio')} // ✨
       price={15}
       backgroundImage="https://rizzflows.com/img_aura/Image_fx(13).png"
       apiMode="hairstudio"
