@@ -2,6 +2,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Tabs, usePathname, useRouter } from 'expo-router';
 import { Sparkles, User, Wallet } from 'lucide-react-native';
 import { cssInterop } from "nativewind";
+import { useTranslation } from 'react-i18next';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -14,11 +15,12 @@ function CustomTabBar() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const pathname = usePathname();
+  const { t } = useTranslation(); // <--- Hook agregado
 
   // Lógica de estado activo
   const isHome = pathname === '/' || pathname === '/index' || pathname === '/(tabs)';
   const isStore = pathname.includes('store');
-  const isProfile = pathname.includes('profile'); // Nuevo estado para perfil
+  const isProfile = pathname.includes('profile');
 
   return (
     <>
@@ -35,14 +37,14 @@ function CustomTabBar() {
         >
           <Wallet size={24} color={isStore ? '#818cf8' : 'white'} />
           <Text className={`text-[10px] mt-1 font-medium ${isStore ? 'text-indigo-400' : 'text-white'}`}>
-            Tienda
+            {t('home.nav_shop')} {/* <--- Texto traducido */}
           </Text>
         </TouchableOpacity>
 
         {/* Espacio vacío para el botón central */}
         <View className="w-20" />
 
-        {/* Botón Perfil (ACTUALIZADO) */}
+        {/* Botón Perfil */}
         <TouchableOpacity
           className="items-center p-2"
           onPress={() => router.push('/(tabs)/profile')}
@@ -50,7 +52,7 @@ function CustomTabBar() {
         >
           <User size={24} color={isProfile ? '#818cf8' : 'white'} />
           <Text className={`text-[10px] mt-1 font-medium ${isProfile ? 'text-indigo-400' : 'text-white'}`}>
-            Perfil
+            {t('home.nav_profile')} {/* <--- Texto traducido */}
           </Text>
         </TouchableOpacity>
       </View>

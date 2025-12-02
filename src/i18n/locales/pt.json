@@ -201,5 +201,29 @@
       "section_8_text": "Podemos atualizar esta política. Notificaremos você sobre alterações.",
       "section_9_title": "9. Contate-nos"
     }
+  },
+  "profile": {
+    "status_premium": "PREMIUM",
+    "status_free": "FREE",
+    "member_pro": "Membro Pro",
+    "member_free": "Membro Gratuito",
+    "credits": "Créditos",
+    "generated": "Geradas",
+    "manage_sub": "Gerenciar Assinatura",
+    "manage_sub_desc": "Faturamento e planos",
+    "upgrade": "Melhorar Plano (Upgrade)",
+    "upgrade_desc": "Desbloquear recursos PRO",
+    "legal_help": "Legal e Ajuda",
+    "privacy": "Política de Privacidade",
+    "terms": "Termos de Serviço",
+    "support": "Ajuda e Suporte",
+    "subject": "Suporte Aura AI",
+    "error_mail": "Não foi possível abrir o aplicativo de e-mail."
+  },
+  "store": {
+    "success_title": "Sucesso!",
+    "success_msg": "Sua compra foi realizada com sucesso.",
+    "restore_title": "Restaurado",
+    "restore_msg": "Suas compras foram restauradas."
   }
 }

@@ -1,5 +1,6 @@
 import * as FileSystem from 'expo-file-system/legacy';
 import { supabase } from '../config/supabase';
+import Purchases from 'react-native-purchases'; // ✅ 1. Importar RevenueCat
 
 // --- MAPA DE MODELOS ---
 export const MODELS = {
@@ -9,9 +10,7 @@ export const MODELS = {
 };
 
 
-
-
-// 6. Virtual Try On
+// 1. Virtual Try On
 const FEATURE_PROMPTS = {
 
   tryon: `
@@ -40,7 +39,7 @@ const FEATURE_PROMPTS = {
     **IDENTITY:** The face must remain unmistakably the user's face, just visually enhanced
   `,
   
-    // 1. ROCKERO 🎸
+    // 2.1. ROCKERO 🎸
     stylist_rock: `
     TRANSFORM the subject into a HIGH-FASHION PUNK-ROCK / GOTHIC ICON.
    
@@ -67,7 +66,7 @@ const FEATURE_PROMPTS = {
     Suit, tie, blazer, office background, clean look, preppy, smiling politely, bright daylight, corporate, business casual, boring clothes, office wear, bad lighting, harsh shadows on face, greasy skin, stiff pose, plastic skin texture, distorted fingers, low resolution.
     `,
 
-  // 2. URBANO 🛹
+  // 2.2. URBANO 🛹
   stylist_urban: `
     Act as a fashion stylist. Change the outfit to HIGH-END STREETWEAR / HYPEBEAST.
     
@@ -78,7 +77,7 @@ const FEATURE_PROMPTS = {
     **IDENTITY:** The face must remain unmistakably the user's face, just visually enhanced
   `,
 
-  // 3. VIKINGO ⚔️
+  // 2.3. VIKINGO ⚔️
   stylist_viking: `
     Transport the subject into a cinematic VIKING FANTASY setting.
     
@@ -90,7 +89,7 @@ const FEATURE_PROMPTS = {
     **IDENTITY:** The face must remain unmistakably the user's face, just visually enhanced
   `,
 
-  // 4. CYBERPUNK 🤖
+  // 2.4. CYBERPUNK 🤖
   stylist_cyberpunk: `
     Transport the subject into a FUTURISTIC CYBERPUNK city.
    
@@ -102,7 +101,7 @@ const FEATURE_PROMPTS = {
     **IDENTITY:** The face must remain unmistakably the user's face, just visually enhanced
   `,
 
-  // 5. RETRO 🤖
+  // 2.5. RETRO 🤖
   stylist_retro: `
     Transport the subject into a FUTURISTIC CYBERPUNK city.
    
@@ -169,7 +168,7 @@ const FEATURE_PROMPTS = {
     **IDENTITY:** The face must remain unmistakably the user's face, just visually enhanced
   `,
 
-    // 7. HAIR STUDIO
+    // 6. HAIR STUDIO
    hairstudio: `
     ACT as a Master Hair Colorist and Stylist.
     Your goal is to give the subject a completely new hairstyle while keeping their face identical.
@@ -262,7 +261,7 @@ const FEATURE_PROMPTS = {
   `,
  
 
-  // 8. GLOBETROTTER (Viajero)
+  // 7. GLOBETROTTER (Viajero)
   globetrotter: `
     Transport the subject to a world-famous travel destination.
     Adjust the lighting on the subject to match the environment perfectly.
@@ -286,7 +285,7 @@ const FEATURE_PROMPTS = {
     **IDENTITY:** The face must remain unmistakably the user's face.
   `,
 
-  // 9. FITNESS BODY
+  // 8. FITNESS BODY
   fitness: `
     TRANSFORM the subject into a FITNESS MODEL version of themselves.
     
@@ -308,7 +307,7 @@ const FEATURE_PROMPTS = {
     **IDENTITY:** The face must remain unmistakably the user's face.
   `,
 
-  // 1. HEADSHOT (Foto LinkedIn)
+  // 9. HEADSHOT (Foto LinkedIn)
   headshot: `
     Generate a photorealistic professional LinkedIn headshot based on the input image.
      
@@ -330,6 +329,7 @@ const FEATURE_PROMPTS = {
   // Aquí pueden ir mas prompts...
 };
 
+
 console.log("🔑 Iniciando Servicio Gemini (vía Supabase Proxy)...");
 
 // MODIFICACIÓN: Agregamos garmentUri como parámetro opcional al final
@@ -338,7 +338,7 @@ export const generateAIImage = async (
   featureKey: string, 
   variant: string | null = null,
   garmentUri: string | null = null
-): Promise<string | null> => {
+): Promise<string> => { // ✅ 2. Cambiado a Promise<string> para obligar a manejar el error
   
   const modelId = MODELS.ARTIST_PRO;
   
@@ -359,6 +359,12 @@ export const generateAIImage = async (
   console.log(`🎨 Transformando modo final: ${promptKey}...`);
 
   try {
+    // ✅ 3. Obtener el ID del Usuario para el cobro
+    const appUserID = await Purchases.getAppUserID();
+    if (!appUserID) {
+        throw new Error("No se pudo identificar al usuario (RevenueCat ID nulo).");
+    }
+
     const base64 = await FileSystem.readAsStringAsync(imageUri, { encoding: 'base64' });
     
     // LÓGICA TRY ON: Leemos la segunda imagen si existe
@@ -378,19 +384,36 @@ export const generateAIImage = async (
 
     // --- NUEVA LÓGICA SEGURA ---
     // Llamamos a la Edge Function de Supabase
-    // Le pasamos el prompt calculado, la imagen y el modelo
     const { data, error } = await supabase.functions.invoke('generate-ai-image', {
         body: { 
             prompt: systemPrompt,
             imageBase64: base64,
             garmentBase64: garmentBase64, // Enviamos la prenda si existe
-            modelName: modelId 
+            modelName: modelId,
+            
+            // ✅ 4. DATOS PARA EL SISTEMA DE CRÉDITOS
+            user_id: appUserID,     // ID de RevenueCat para saber a quién cobrar
+            feature_id: promptKey   // Clave (ej. 'stylist_rock') para saber cuánto cobrar
         }
     });
 
+    // Manejo de Errores de Supabase / Edge Function
     if (error) {
+        // Detectar si es error de saldo (402)
+        // A veces Supabase envuelve el error HTTP
+        if (error instanceof Error && error.message.includes("402")) {
+             throw new Error("INSUFFICIENT_CREDITS");
+        }
         console.error("❌ Error de comunicación con Supabase:", error);
         throw error;
+    }
+
+    // Manejo de Errores de Negocio devueltos por la función
+    if (data && data.error) {
+        if (data.code === 'INSUFFICIENT_CREDITS' || data.error.includes("Saldo insuficiente")) {
+            throw new Error("INSUFFICIENT_CREDITS");
+        }
+        throw new Error(data.error);
     }
 
     if (!data || !data.image) {
@@ -402,6 +425,8 @@ export const generateAIImage = async (
 
   } catch (error: any) {
     console.error("❌ Error en servicio Gemini:", error);
-    return null;
+    // ✅ 5. Relanzamos el error en lugar de devolver null
+    // Esto permite que tu UI muestre el Paywall si el mensaje es INSUFFICIENT_CREDITS
+    throw error;
   }
 };

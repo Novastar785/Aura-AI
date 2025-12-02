@@ -201,5 +201,29 @@
       "section_8_text": "We may update this policy. We will notify you of changes.",
       "section_9_title": "9. Contact Us"
     }
+  },
+  "profile": {
+    "status_premium": "PREMIUM",
+    "status_free": "FREE",
+    "member_pro": "Pro Member",
+    "member_free": "Free Member",
+    "credits": "Credits",
+    "generated": "Generated",
+    "manage_sub": "Manage Subscription",
+    "manage_sub_desc": "Billing and plans",
+    "upgrade": "Upgrade Plan",
+    "upgrade_desc": "Unlock PRO features",
+    "legal_help": "Legal & Help",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "support": "Help & Support",
+    "subject": "Aura AI Support",
+    "error_mail": "Could not open mail app."
+  },
+  "store": {
+    "success_title": "Success!",
+    "success_msg": "Your purchase was successful.",
+    "restore_title": "Restored",
+    "restore_msg": "Your purchases have been restored."
   }
 }
