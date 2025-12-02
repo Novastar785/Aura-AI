@@ -1,11 +1,13 @@
 import { useRouter } from 'expo-router';
 import { ArrowLeft, Lock } from 'lucide-react-native';
 import React from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { ScrollView, StatusBar, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function PrivacyScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
 
   return (
     <View className="flex-1 bg-[#0f0f0f]">
@@ -20,7 +22,7 @@ export default function PrivacyScreen() {
           >
             <ArrowLeft size={20} color="white" />
           </TouchableOpacity>
-          <Text className="text-white text-xl font-bold">Política de Privacidad</Text>
+          <Text className="text-white text-xl font-bold">{t('legal.privacy_title')}</Text>
         </View>
       </SafeAreaView>
 
@@ -30,32 +32,66 @@ export default function PrivacyScreen() {
           <View className="w-16 h-16 bg-emerald-500/10 rounded-full items-center justify-center mb-4 border border-emerald-500/20">
             <Lock size={32} color="#34d399" />
           </View>
-          <Text className="text-zinc-400 text-xs uppercase tracking-widest">Tus datos están seguros</Text>
+          <Text className="text-zinc-400 text-xs uppercase tracking-widest">{t('legal.data_secure')}</Text>
+          <Text className="text-zinc-500 text-[10px] mt-1">{t('legal.last_updated')}</Text>
         </View>
 
         <View className="gap-6">
-          <Section title="1. Recopilación de Datos">
-            Para ofrecerte nuestros servicios de edición de fotos con IA, recopilamos las imágenes que subes temporalmente. Estas imágenes se utilizan exclusivamente para el proceso de generación y se eliminan de nuestros servidores de procesamiento poco después (generalmente en 24 horas).
+          <Text className="text-zinc-300 leading-6 text-base">
+            <Trans 
+              i18nKey="legal.privacy.intro" 
+              values={{ appName: t('legal.app_name'), companyName: t('legal.company_name') }}
+              components={{ bold: <Text className="font-bold text-white" /> }} 
+            />
+          </Text>
+
+          <Section title={t('legal.privacy.section_1_title')}>
+            <Text className="font-bold text-indigo-400">{t('legal.privacy.section_1_a')}</Text>
+            {(t('legal.privacy.section_1_a_list', { returnObjects: true }) as string[]).map((item, i) => (
+              <Text key={`a-${i}`}>{'\n'}• {item}</Text>
+            ))}
+            {'\n\n'}
+            <Text className="font-bold text-indigo-400">{t('legal.privacy.section_1_b')}</Text>
+            {(t('legal.privacy.section_1_b_list', { returnObjects: true }) as string[]).map((item, i) => (
+              <Text key={`b-${i}`}>{'\n'}• {item}</Text>
+            ))}
           </Section>
 
-          <Section title="2. Uso de Tus Fotos">
-            <Text className="text-zinc-300 leading-6">
-              • <Text className="font-bold text-white">No vendemos tus fotos.</Text>{'\n'}
-              • No utilizamos tus fotos para entrenar modelos de IA públicos sin tu consentimiento explícito.{'\n'}
-              • Tus fotos originales y las generadas solo son visibles para ti.
-            </Text>
+          <Section title={t('legal.privacy.section_2_title')}>
+            {(t('legal.privacy.section_2_list', { returnObjects: true }) as string[]).map((item, i) => (
+              <Text key={i}>{'\n'}• {item}</Text>
+            ))}
           </Section>
 
-          <Section title="3. Almacenamiento Local">
-            Aura AI almacena las imágenes generadas en tu dispositivo o en tu galería privada dentro de la app (si usas la función de álbum). Si eliminas la app, es posible que pierdas las imágenes que no hayas guardado en tu carrete.
+          <Section title={t('legal.privacy.section_3_title')}>
+            {t('legal.privacy.section_3_text')}
           </Section>
 
-          <Section title="4. Servicios de Terceros">
-            Utilizamos proveedores de servicios en la nube seguros (como Google Cloud o AWS) para procesar las imágenes. Estos proveedores están obligados por contrato a mantener la confidencialidad de tus datos.
+          <Section title={t('legal.privacy.section_4_title')}>
+            {(t('legal.privacy.section_4_list', { returnObjects: true }) as string[]).map((item, i) => (
+              <Text key={i}>{'\n'}• {item}</Text>
+            ))}
           </Section>
 
-          <Section title="5. Eliminación de Cuenta">
-            Puedes solicitar la eliminación completa de tu cuenta y todos los datos asociados desde la configuración de la aplicación en cualquier momento.
+          <Section title={t('legal.privacy.section_5_title')}>
+            {t('legal.privacy.section_5_text')}
+          </Section>
+
+          <Section title={t('legal.privacy.section_6_title')}>
+            {t('legal.privacy.section_6_text')}
+          </Section>
+
+          <Section title={t('legal.privacy.section_7_title')}>
+            {t('legal.privacy.section_7_text')}
+          </Section>
+
+          <Section title={t('legal.privacy.section_8_title')}>
+            {t('legal.privacy.section_8_text')}
+          </Section>
+
+          <Section title={t('legal.privacy.section_9_title')}>
+            <Text className="font-bold text-white">Email:</Text> {t('legal.contact_email')}
+            {'\n'}<Text className="font-bold text-white">Company:</Text> {t('legal.company_name')}
           </Section>
         </View>
 

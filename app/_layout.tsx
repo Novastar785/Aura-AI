@@ -9,25 +9,42 @@ import { setStatusBarHidden } from 'expo-status-bar';
 import { useEffect } from "react";
 import { Platform } from "react-native";
 
+// --- REVENUECAT IMPORTS ---
+import Purchases from 'react-native-purchases';
+import { REVENUECAT_API_KEY } from '../src/config/secrets';
+
 // Este archivo es el punto de entrada de toda la app.
 // Aquí importamos los estilos globales y definimos la navegación base.
 export default function Layout() {
 
   // --- LÓGICA AGREGADA ---
   useEffect(() => {
+    // 1. Configuración de UI Sistema (Android)
     if (Platform.OS === 'android') {
-      // 1. Ocultar la barra de estado superior
       setStatusBarHidden(true, 'fade');
-
-      // 2. Ocultar la barra de navegación inferior
       NavigationBar.setVisibilityAsync("hidden");
-
-      // 3. Configurar comportamiento al deslizar (aparece y se vuelve a ir)
       NavigationBar.setBehaviorAsync("overlay-swipe");
-      
-      // (Opcional) Fondo transparente para que no corte el diseño si aparece
       NavigationBar.setBackgroundColorAsync("transparent");
     }
+
+    // 2. Inicialización de RevenueCat
+    const initRevenueCat = async () => {
+      try {
+        if (Platform.OS === 'android') {
+           // Asegúrate de que REVENUECAT_API_KEY tenga tu llave real en secrets.ts
+           await Purchases.configure({ apiKey: REVENUECAT_API_KEY });
+        }
+        // Si tienes iOS, agregarías un `else if (Platform.OS === 'ios')` con su llave correspondiente
+        
+        // (Opcional) Logs para depurar mientras desarrollas
+        await Purchases.setLogLevel(Purchases.LOG_LEVEL.DEBUG);
+      } catch (e) {
+        console.error("Error inicializando RevenueCat", e);
+      }
+    };
+
+    initRevenueCat();
+
   }, []);
 
   return (

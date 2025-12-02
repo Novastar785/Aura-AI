@@ -100,5 +100,106 @@
     "socials": "Potencialize suas redes com fotos de perfil naturais.",
     "globetrotter": "Viaje para os lugares mais icônicos do mundo.",
     "headshot": "Sua foto profissional para LinkedIn em segundos."
+  },
+  "legal": {
+    "terms_title": "Termos de Serviço",
+    "privacy_title": "Política de Privacidade",
+    "last_updated": "Última atualização: 28 de Novembro, 2025",
+    "data_secure": "Seus dados estão seguros",
+    "company_name": "ADSEGOM LTD",
+    "app_name": "Aura AI",
+    "contact_email": "info@aura-ai.com",
+    "terms": {
+      "intro": "Bem-vindo ao <bold>{{appName}}</bold>, um aplicativo móvel operado pela <bold>{{companyName}}</bold> ('Empresa', 'nós'). Estes Termos de Serviço regem seu acesso e uso do App. Ao usar os Serviços, você concorda em ficar vinculado a estes Termos Legais.",
+      "section_1_title": "1. Acordo de Termos e Elegibilidade",
+      "section_1_text": "O App destina-se a usuários com pelo menos 18 anos. Menores de 18 anos não têm permissão para usar ou registrar-se nos Serviços.",
+      "user_representations": "Declarações do Usuário:",
+      "user_rep_list": [
+        "Você tem capacidade legal e concorda em cumprir estes Termos.",
+        "Você não é menor de idade na jurisdição em que reside.",
+        "Não acessará os Serviços por meios automatizados (bots, scripts).",
+        "Não usará os Serviços para qualquer finalidade ilegal ou não autorizada."
+      ],
+      "section_2_title": "2. Descrição dos Serviços e Aviso de IA",
+      "section_2_text": "Aura AI é um editor de fotos com IA projetado para gerar avatares, provas virtuais e transformações de estilo. O App permite enviar fotos para receber conteúdo gerado por IA.",
+      "ai_disclaimer_title": "AVISO IMPORTANTE DE IA:",
+      "ai_disclaimer_text": "O conteúdo é gerado por Inteligência Artificial. A IA pode cometer erros ou 'alucinar'. Não garantimos a precisão. Você é responsável por revisar as imagens geradas.",
+      "section_3_title": "3. Compras e Assinaturas",
+      "section_3_payments": "Pagamentos: Você concorda em fornecer informações de compra atuais, completas e precisas. As transações são processadas pela respectiva loja de aplicativos.",
+      "section_3_subs": "Assinaturas: Renovam-se automaticamente, a menos que canceladas pelo menos 24 horas antes do final do período atual.",
+      "section_3_refunds": "Cancelamento e Reembolsos: Todas as compras são finais e não reembolsáveis. Solicitações de reembolso devem ser feitas via Apple ou Google.",
+      "section_4_title": "4. Direitos de Propriedade Intelectual",
+      "section_4_text": "Somos proprietários de todos os direitos de propriedade intelectual em nossos Serviços. Concedemos a você um direito limitado, revogável e não exclusivo para instalar e usar o Aplicativo.",
+      "section_5_title": "5. Contribuições do Usuário",
+      "section_5_text": "Ao postar Contribuições (fotos), você nos concede o direito de hospedá-las, usá-las e processá-las para fornecer os serviços de geração de IA. Você garante que suas Contribuições não infringem direitos de terceiros.",
+      "section_6_title": "6. Atividades Proibidas",
+      "section_6_list": [
+        "Recuperar sistematicamente dados para criar bancos de dados.",
+        "Enganar, fraudar ou induzir outros usuários ao erro.",
+        "Enviar vírus ou material prejudicial.",
+        "Usar os Serviços para gerar conteúdo NSFW ou ilegal."
+      ],
+      "section_7_title": "7. Conteúdo de Terceiros",
+      "section_7_text": "Os Serviços podem conter links para sites de terceiros. Não investigamos nem monitoramos esses conteúdos.",
+      "section_8_title": "8. Rescisão",
+      "section_8_text": "Reservamo-nos o direito de negar acesso aos Serviços por qualquer motivo, incluindo violação destes Termos.",
+      "section_9_title": "9. Modificações",
+      "section_9_text": "Reservamo-nos o direito de alterar ou remover o conteúdo dos Serviços a qualquer momento.",
+      "section_10_title": "10. Isenção de Garantias",
+      "section_10_text": "OS SERVIÇOS SÃO FORNECIDOS 'NO ESTADO EM QUE SE ENCONTRAM'. O USO DOS SERVIÇOS É POR SUA CONTA E RISCO.",
+      "section_11_title": "11. Limitações de Responsabilidade",
+      "section_11_text": "EM NENHUMA HIPÓTESE SEREMOS RESPONSÁVEIS POR QUAISQUER DANOS DIRETOS, INDIRETOS, CONSEQUENCIAIS OU PUNITIVOS.",
+      "section_12_title": "12. Indenização",
+      "section_12_text": "Você concorda em nos defender, indenizar e isentar de qualquer perda, dano ou responsabilidade.",
+      "section_13_title": "13. Política de Privacidade",
+      "section_13_text": "Preocupamo-nos com a privacidade dos dados. Reveja nossa Política de Privacidade, incorporada a estes Termos.",
+      "section_14_title": "14. Comunicações Eletrônicas",
+      "section_14_text": "Você concorda em receber comunicações eletrônicas e concorda que todos os acordos e avisos satisfazem qualquer requisito legal.",
+      "section_15_title": "15. Lei Aplicável",
+      "section_15_text": "Estes Termos são regidos pelas leis do Estado de Delaware (Estados Unidos).",
+      "section_16_title": "16. Resolução de Disputas",
+      "section_16_text": "Disputas serão resolvidas por arbitragem vinculativa em Delaware.",
+      "section_17_title": "17. Disposições Diversas",
+      "section_17_text": "Estes Termos constituem o acordo integral. Se alguma disposição for ilegal, será considerada separável.",
+      "section_18_title": "18. Contate-nos"
+    },
+    "privacy": {
+      "intro": "Esta Política de Privacidade explica como a <bold>{{companyName}}</bold> coleta, usa e divulga informações sobre você quando usa o <bold>{{appName}}</bold>.",
+      "section_1_title": "1. Informações que Coletamos",
+      "section_1_a": "a. Informações que Você Fornece",
+      "section_1_a_list": [
+        "Informações da Conta: Nome e e-mail (gerenciado por terceiros).",
+        "Conteúdo do Usuário: Fotos que você envia para processamento de IA."
+      ],
+      "section_1_b": "b. Informações Coletadas Automaticamente",
+      "section_1_b_list": [
+        "Dados de Uso: Recursos usados, frequência.",
+        "Informações do Dispositivo: Modelo, versão do SO."
+      ],
+      "section_2_title": "2. Como Usamos suas Informações",
+      "section_2_list": [
+        "Fornecer e melhorar o App.",
+        "Processar Solicitações de IA (gerar avatares, estilos).",
+        "Gerenciar contas e assinaturas.",
+        "Responder a solicitações de suporte."
+      ],
+      "section_3_title": "3. Como Compartilhamos suas Informações",
+      "section_3_text": "Não vendemos seus dados pessoais. Compartilhamos dados apenas com Provedores de IA (para processamento), Infraestrutura de Backend (armazenamento) e Requisitos Legales.",
+      "section_4_title": "4. Processamento e Retenção de Imagens",
+      "section_4_list": [
+        "As imagens são enviadas com segurança para provedores de IA.",
+        "NÃO armazenamos permanentemente suas imagens originais após o processamento.",
+        "Mantemos as informações da conta enquanto estiver ativa."
+      ],
+      "section_5_title": "5. Segurança de Dados",
+      "section_5_text": "Usamos medidas de segurança padrão da indústria. No entanto, nenhuma transmissão pela internet é 100% segura.",
+      "section_6_title": "6. Exclusão de Dados",
+      "section_6_text": "Você pode solicitar a exclusão de sua conta e dados dentro do app ou entrando em contato conosco.",
+      "section_7_title": "7. Privacidade de Crianças",
+      "section_7_text": "O App não se destina a menores de 18 anos. Não coletamos intencionalmente informações de crianças.",
+      "section_8_title": "8. Alterações na Política",
+      "section_8_text": "Podemos atualizar esta política. Notificaremos você sobre alterações.",
+      "section_9_title": "9. Contate-nos"
+    }
   }
 }
