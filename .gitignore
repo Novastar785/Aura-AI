@@ -13,7 +13,7 @@ expo/metro/config
 *.xccheckout
 *.xcscmblueprint
 
-secrets
+# secrets
 
 EXPO ENV
 

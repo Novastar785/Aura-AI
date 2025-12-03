@@ -1,20 +1,21 @@
+import { Platform } from 'react-native';
+
 // AQUÍ GUARDAMOS LOS SECRETOS DE FORMA CENTRALIZADA
-// En el futuro, moveremos esto a Variables de Entorno (.env) o Edge Functions
 
-// REEMPLAZA ESTO CON TU PUBLIC API KEY DE REVENUECAT (Project Settings -> API Keys -> Public Key)
-export const REVENUECAT_API_KEY = "test_GOyQyspeXcnwtOigxRsrialvYIb"; 
+// 1. TUS CLAVES REALES DE REVENUECAT (Copiadas de tu mensaje anterior)
+const ANDROID_KEY = "goog_XZDPQgjeJCvuWYrTMZVWvIlOQXD";
+const IOS_KEY = "appl_wsalVtnbRdeJbMZJoHNAuYmpFXk";
 
-// Si tuviéramos más keys (Supabase, RevenueCat), irían aquí:
-// export const SUPABASE_URL = "...";
-// Este archivo centraliza tus claves API.
-// IMPORTANTE: Nunca subas tus claves reales a un repositorio público de GitHub.
+// 2. Exportamos la clave correcta automáticamente según la plataforma
+// La app detectará si es iOS o Android y usará la clave correspondiente.
+export const REVENUECAT_API_KEY = Platform.select({
+  ios: IOS_KEY,
+  android: ANDROID_KEY,
+  default: ANDROID_KEY, // Fallback por seguridad
+});
 
-export const SUPABASE_URL = "https://acrqlwtkhcvdnkmdeibi.supabase.co"; // Tu URL de proyecto
-export const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."; // Tu clave anónima pública
+// Otras configuraciones (Mantenemos tus otros valores)
+export const SUPABASE_URL = "https://acrqlwtkhcvdnkmdeibi.supabase.co"; 
+export const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFjcnFsd3RraGN2ZG5rbWRlaWJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM3NTUzODAsImV4cCI6MjA3OTMzMTM4MH0.ZdJiwSjSvfcUG2Dqy_04Nf4pCVd1SqEgNWZWQsut_bc"; // Tu clave anónima pública
 
-// RevenueCat Keys (Las obtienes en el Dashboard de RevenueCat -> API Keys)
-export const REVENUECAT_APPLE_KEY = "appl_TU_CLAVE_DE_APPLE"; 
-export const REVENUECAT_GOOGLE_KEY = "goog_TU_CLAVE_DE_GOOGLE";
-
-// Otras configuraciones
 export const APP_NAME = "Aura AI";

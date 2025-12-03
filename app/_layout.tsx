@@ -1,20 +1,17 @@
-import { Stack } from "expo-router";
-import "../src/i18n";
-import "./global.css";
-
+import { DarkTheme, Theme, ThemeProvider } from '@react-navigation/native';
 import * as NavigationBar from 'expo-navigation-bar';
+import { Stack } from "expo-router";
 import * as SplashScreen from 'expo-splash-screen';
 import * as SystemUI from 'expo-system-ui';
 import LottieView from 'lottie-react-native';
 import { useEffect, useRef, useState } from "react";
 import { Platform, StyleSheet, View } from "react-native";
-
-// 1. Importamos las herramientas de tema de React Navigation
-import { DarkTheme, Theme, ThemeProvider } from '@react-navigation/native';
-
-// --- REVENUECAT IMPORTS ---
 import Purchases from 'react-native-purchases';
+
+// Importaciones locales
 import { REVENUECAT_API_KEY } from '../src/config/secrets';
+import "../src/i18n/index";
+import "./global.css";
 
 // Mantiene el splash nativo visible hasta que le digamos lo contrario
 SplashScreen.preventAutoHideAsync();
@@ -39,6 +36,7 @@ export default function Layout() {
   useEffect(() => {
     async function prepare() {
       try {
+        // Configuración visual solo para Android (NavBar transparente)
         if (Platform.OS === 'android') {
           await SystemUI.setBackgroundColorAsync("#0f0f0f");
           await NavigationBar.setVisibilityAsync("hidden");
@@ -48,8 +46,15 @@ export default function Layout() {
 
         const initRevenueCat = async () => {
           try {
-            if (Platform.OS === 'android') {
-               await Purchases.configure({ apiKey: REVENUECAT_API_KEY });
+            // CORRECCIÓN IMPORTANTE:
+            // Ya no usamos "if (Platform.OS === 'android')" aquí.
+            // Como secrets.ts ya nos da la key correcta (sea ios o android),
+            // ejecutamos esto para AMBAS plataformas.
+            if (REVENUECAT_API_KEY) {
+                await Purchases.configure({ apiKey: REVENUECAT_API_KEY });
+                console.log("RevenueCat configurado correctamente");
+            } else {
+                console.warn("No se encontró API Key de RevenueCat");
             }
           } catch (e) {
             console.error("Error inicializando RevenueCat", e);
@@ -72,7 +77,6 @@ export default function Layout() {
     if (appIsReady) {
       SplashScreen.hideAsync();
       
-      // Pequeño delay en Android para suavidad (igual que en tu ejemplo)
       if (Platform.OS === 'android') {
         setTimeout(() => {
           animationRef.current?.play();
@@ -89,11 +93,11 @@ export default function Layout() {
         <LottieView
           ref={animationRef}
           source={require('../assets/animations/splash-animation.json')}
-          autoPlay={false} // Controlamos el play manualmente
+          autoPlay={false} 
           loop={false}
           resizeMode="cover"
           onAnimationFinish={() => setAnimationFinished(true)}
-          style={styles.lottie} // <--- AQUI ESTABA LA DIFERENCIA
+          style={styles.lottie}
         />
       </View>
     );
@@ -121,7 +125,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   lottie: {
-    // CORRECCIÓN: Tamaño fijo en lugar de porcentajes
     width: 250, 
     height: 250,
   },
