@@ -7,14 +7,20 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const CREDIT_MAP = {
   // SUSCRIPCIONES (Recurrentes - "Use it or lose it")
-  "aura_weekly_premium": 150,   // Plan Semanal
-  "aura_monthly_premium": 700,  // Plan Mensual
-  "aura_yearly_premium": 10000, // (Opcional) Plan Anual
+  "auraweeklypremium": 150,   // Antes: aura_weekly_premium
+  "auramonthlypremium": 700,  // Antes: aura_monthly_premium
+  "aurayearlypremium": 10000, // Antes: aura_yearly_premium
+
+  // Si usaste guiones medios en Google, descomenta y usa estos:
+  // "aura-weekly-premium": 150,
+  // "aura-monthly-premium": 700,
 
   // PACKS (Pago único - Se suman)
-  "aura_pack_50": 50,    // Pack Pequeño
-  "aura_pack_100": 100,  // Pack Mediano
-  "aura_pack_500": 500   // (Opcional) Pack Grande
+  // Estos suelen ser "In-App Products", Google suele ser más flexible aquí,
+  // pero por consistencia revisa si también necesitas cambiarlos.
+  "aurapack50": 50,    
+  "aurapack100": 100, 
+  "aurapack500": 500   
 };
 
 serve(async (req) => {

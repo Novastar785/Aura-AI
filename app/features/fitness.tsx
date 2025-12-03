@@ -1,10 +1,11 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next'; // ✨
 import GenericToolScreen, { ToolOption } from '../../components/GenericToolScreen';
+import { useRemoteConfig } from '../../hooks/useRemoteConfig';
 
 export default function FitnessScreen() {
   const { t } = useTranslation(); // ✨
-  
+  const { getCost } = useRemoteConfig();
   const options: ToolOption[] = [
     { 
       id: 'shredded', 
@@ -22,7 +23,7 @@ export default function FitnessScreen() {
     <GenericToolScreen 
       title={t('tools.fitness.title')} // ✨
       subtitle={t('feature_descriptions.fitness')} // ✨
-      price={3}
+      price={getCost('fitness', 3)} // <--- USAR ID DE LA DB
       backgroundImage="https://rizzflows.com/img_aura/Image_fx(14).png"
       apiMode="fitness"
       options={options}

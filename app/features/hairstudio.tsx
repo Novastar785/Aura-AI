@@ -1,10 +1,12 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next'; // ✨
 import GenericToolScreen, { ToolOption } from '../../components/GenericToolScreen';
+import { useRemoteConfig } from '../../hooks/useRemoteConfig';
 
 export default function HairStudioScreen() {
   const { t } = useTranslation(); // ✨
-  
+  const { getCost } = useRemoteConfig(); // <--- Usar Hook
+
   const options: ToolOption[] = [
     { 
       id: 'butterfly', 
@@ -63,7 +65,7 @@ export default function HairStudioScreen() {
     <GenericToolScreen 
       title={t('tools.hairstudio.title')} // ✨
       subtitle={t('feature_descriptions.hairstudio')} // ✨
-      price={2}
+      price={getCost('hairstudio', 2)} // <--- USAR ID DE LA DB
       backgroundImage="https://rizzflows.com/img_aura/Image_fx(13).png"
       apiMode="hairstudio"
       options={options}

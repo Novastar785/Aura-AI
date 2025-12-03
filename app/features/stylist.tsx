@@ -1,9 +1,11 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next'; // ✨
 import GenericToolScreen, { ToolOption } from '../../components/GenericToolScreen';
+import { useRemoteConfig } from '../../hooks/useRemoteConfig';
 
 export default function StylistScreen() {
   const { t } = useTranslation(); // ✨
+  const { getCost } = useRemoteConfig(); // <--- Usar Hook
   
   // Aquí definimos las tarjetas visuales
   // El 'id' debe coincidir con lo que pusimos en gemini.ts después del guion bajo (stylist_ROCK)
@@ -39,7 +41,7 @@ export default function StylistScreen() {
     <GenericToolScreen 
       title={t('tools.stylist.title')} // ✨
       subtitle={t('feature_descriptions.stylist')} // ✨
-      price={2}
+      price={getCost('stylist', 2)} // <--- USAR ID DE LA DB
       // Imagen de fondo general de la pantalla
       backgroundImage="https://rizzflows.com/img_aura/Image_fx(3).png"
       apiMode="stylist"

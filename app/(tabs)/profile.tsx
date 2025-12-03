@@ -17,14 +17,14 @@ import { Alert, Linking, ScrollView, StatusBar, Text, TouchableOpacity, View } f
 import Purchases from 'react-native-purchases';
 import RevenueCatUI from 'react-native-purchases-ui';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { supabase } from '../../src/config/supabase'; // ✅ IMPORTANTE: Importamos Supabase directamente
+import { supabase } from '../../src/config/supabase';
 import { restorePurchases } from '../../src/services/revenueCat';
 
 export default function ProfileScreen() {
   const router = useRouter();
   const { t } = useTranslation();
 
-  // --- ESTADO REAL ---
+  // --- ESTADO ---
   const [credits, setCredits] = useState({ sub: 0, pack: 0, total: 0 });
   const [userId, setUserId] = useState("");
   const [isSubscribed, setIsSubscribed] = useState(false);
@@ -38,11 +38,10 @@ export default function ProfileScreen() {
 
   const loadData = async () => {
     try {
-      // 1. Obtener Info del Cliente de RevenueCat (FUENTE DE LA VERDAD)
+      // 1. Obtener Info del Cliente
       const customerInfo = await Purchases.getCustomerInfo();
       const appUserID = await Purchases.getAppUserID(); 
       
-      console.log("🔍 Profile - RevenueCat ID:", appUserID); // Debug para ver el ID
       setUserId(appUserID);
 
       // 2. Verificar Suscripción
@@ -52,24 +51,23 @@ export default function ProfileScreen() {
           setIsSubscribed(false);
       }
 
-      // 3. Obtener Créditos de Supabase USANDO EL ID DE REVENUECAT
-      // ⚠️ Reemplazamos getUserCredits() por una consulta directa y segura
+      // 3. Obtener Créditos
       const { data, error } = await supabase
-        .from('profiles')
-        .select('credits') // Asegúrate de que tu columna se llama 'credits'
-        .eq('id', appUserID) // 🔥 CLAVE: Usamos el ID de RevenueCat, no el de Auth
+        .from('user_credits')
+        .select('subscription_credits, pack_credits')
+        .eq('user_id', appUserID)
         .single();
 
       if (data) {
-        // Asumimos que 'credits' es el total. Si tienes lógica de packs vs subs, ajusta aquí.
-        // Por defecto, asignamos todo al 'pack' o 'standard' para que se vea en el UI.
+        const sub = data.subscription_credits || 0;
+        const pack = data.pack_credits || 0;
+        
         setCredits({ 
-            sub: 0, // Si tienes una columna 'credits_sub', úsala aquí
-            pack: data.credits || 0, 
-            total: data.credits || 0 
+            sub: sub,
+            pack: pack, 
+            total: sub + pack 
         });
       } else {
-        console.log("⚠️ No se encontró perfil para este ID (Usuario nuevo o error)", error);
         setCredits({ sub: 0, pack: 0, total: 0 });
       }
 
@@ -78,20 +76,21 @@ export default function ProfileScreen() {
     }
   };
 
-  // --- FUNCIONES DE REVENUECAT ---
+  // --- FUNCIONES DE ACCIÓN ---
   const handleRestore = async () => {
     try {
         await restorePurchases();
         await loadData();
-        Alert.alert("Éxito", "Compras restauradas y saldo sincronizado.");
+        Alert.alert(t('store.restore_title'), t('store.restore_msg'));
     } catch (e) {
-        // El error ya se maneja en el servicio
+        // Error silencioso o manejado en servicio
     }
   };
 
   const openCustomerCenter = async () => {
     try {
       await RevenueCatUI.presentCustomerCenter();
+      await loadData();
     } catch (e) {
       Alert.alert("Info", t('profile.manage_sub_desc'));
     }
@@ -102,14 +101,14 @@ export default function ProfileScreen() {
         await RevenueCatUI.presentPaywall({ 
             displayCloseButton: true 
         });
+        await loadData();
     } catch (e) {
         console.log("Paywall cerrado", e);
     }
   };
 
-  // --- FUNCIÓN DE SOPORTE ---
   const handleSupport = async () => {
-    const email = 'info@rizzflows.com';
+    const email = 'info@aura-ai.com';
     const subject = t('profile.subject');
     const url = `mailto:${email}?subject=${subject}`;
 
@@ -141,9 +140,9 @@ export default function ProfileScreen() {
     },
     { 
       icon: RefreshCcw, 
-      label: "Restaurar Compras", 
+      label: t('store.restore_title') || "Restaurar", 
       action: handleRestore,
-      subtitle: "Recuperar saldo y suscripción",
+      subtitle: "Recuperar compras",
       iconColor: '#14b8a6', 
       bgIcon: 'bg-teal-500/10'
     },

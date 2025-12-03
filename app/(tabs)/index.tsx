@@ -1,12 +1,14 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import * as MediaLibrary from 'expo-media-library';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { Plus, Sparkles } from 'lucide-react-native';
 import { cssInterop } from "nativewind";
-import React, { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next'; // ✨ Import i18n
+import React, { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Dimensions, Image, ScrollView, StatusBar, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useRemoteConfig } from '../../hooks/useRemoteConfig'; // <--- AGREGAR ESTO
+import { getUserCredits } from '../../src/services/revenueCat';
 
 cssInterop(LinearGradient, {
   className: "style",
@@ -26,8 +28,21 @@ export default function HomeScreen() {
   const router = useRouter();
   const { t } = useTranslation(); // ✨ Hook
   
+  const { getCost } = useRemoteConfig();
   const [galleryPhotos, setGalleryPhotos] = useState<any[]>([]);
   const [hasPermission, setHasPermission] = useState<boolean>(false);
+  const [credits, setCredits] = useState(0);
+
+  // Cargar créditos cada vez que la pantalla se enfoca
+  useFocusEffect(
+    useCallback(() => {
+      const loadCredits = async () => {
+        const creditData = await getUserCredits();
+        setCredits(creditData.total);
+      };
+      loadCredits();
+    }, [])
+  );
 
   // --- CONFIGURACIÓN DE RUTAS DINÁMICA (PARA TRADUCCIONES) ---
   const TOOLS = [
@@ -36,7 +51,7 @@ export default function HomeScreen() {
      route: '/features/tryon', 
      title: t('tools.tryon.title'), 
      subtitle: t('tools.tryon.subtitle'), 
-     price: '3', 
+     price: getCost('tryon', 3), // <--- CAMBIO: Precio dinámico (default 3) 
      image: 'https://rizzflows.com/img_aura/Vtryon.png', 
      badge: 'FUN' 
    },
@@ -45,7 +60,7 @@ export default function HomeScreen() {
      route: '/features/stylist', 
      title: t('tools.stylist.title'), 
      subtitle: t('tools.stylist.subtitle'), 
-     price: '2', 
+     price: getCost('stylist', 2), // <--- CAMBIO: Precio dinámico (default 2)
      image: 'https://rizzflows.com/img_aura/Image_fx(3).png', 
      badge: 'TRENDING' 
    },
@@ -54,7 +69,7 @@ export default function HomeScreen() {
      route: '/features/hairstudio', 
      title: t('tools.hairstudio.title'), 
      subtitle: t('tools.hairstudio.subtitle'), 
-     price: '2', 
+     price: getCost('hairstudio', 2), // <--- CAMBIO 
      image: 'https://rizzflows.com/img_aura/Image_fx(13).png', 
      badge: 'NEW' 
    },
@@ -63,7 +78,7 @@ export default function HomeScreen() {
      route: '/features/fitness', 
      title: t('tools.fitness.title'), 
      subtitle: t('tools.fitness.subtitle'), 
-     price: '3', 
+     price: getCost('fitness', 3), // <--- CAMBIO
      image: 'https://rizzflows.com/img_aura/Image_fx(14).png', 
      badge: '' 
    },
@@ -72,7 +87,7 @@ export default function HomeScreen() {
      route: '/features/glowup', 
      title: t('tools.glowup.title'), 
      subtitle: t('tools.glowup.subtitle'), 
-     price: '2', 
+     price: getCost('glowup', 2), // <--- CAMBIO
      image: 'https://rizzflows.com/img_aura/Image_fx(8).png', 
      badge: '' 
    },
@@ -81,7 +96,7 @@ export default function HomeScreen() {
      route: '/features/luxury', 
      title: t('tools.luxury.title'), 
      subtitle: t('tools.luxury.subtitle'), 
-     price: '2', 
+     price: getCost('luxury', 2), // <--- CAMBIO
      image: 'https://rizzflows.com/img_aura/bmw%20rojo.jpg', 
      badge: 'VIRAL' 
    },
@@ -90,7 +105,7 @@ export default function HomeScreen() {
      route: '/features/socials', 
      title: t('tools.socials.title'), 
      subtitle: t('tools.socials.subtitle'), 
-     price: '2', 
+     price: getCost('socials', 2), // <--- CAMBIO
      image: 'https://rizzflows.com/img_aura/Image_fx(10).png', 
      badge: '' 
    },
@@ -99,7 +114,7 @@ export default function HomeScreen() {
      route: '/features/globetrotter', 
      title: t('tools.globetrotter.title'), 
      subtitle: t('tools.globetrotter.subtitle'), 
-     price: '2', 
+     price: getCost('globetrotter', 2), // <--- CAMBIO 
      image: 'https://rizzflows.com/img_aura/Image_fx(12).png', 
      badge: 'NEW' 
    }, 
@@ -108,7 +123,7 @@ export default function HomeScreen() {
      route: '/features/headshot', 
      title: t('tools.headshot.title'), 
      subtitle: t('tools.headshot.subtitle'), 
-     price: '3', 
+     price: getCost('headshot', 3), // <--- CAMBIO
      image: 'https://rizzflows.com/img_aura/Image_fx(1).png', 
      badge: 'POPULAR' 
    },
@@ -168,7 +183,7 @@ export default function HomeScreen() {
             </View>
             <TouchableOpacity className="flex-row items-center bg-zinc-800/80 px-3 py-1.5 rounded-full border border-zinc-700">
               <View className="w-2 h-2 rounded-full bg-purple-500 mr-2 shadow-lg shadow-purple-500" />
-              <Text className="text-white font-bold mr-2">120</Text>
+              <Text className="text-white font-bold mr-2">{credits}</Text>
               <Plus size={14} color="#a1a1aa" />
             </TouchableOpacity>
           </View>

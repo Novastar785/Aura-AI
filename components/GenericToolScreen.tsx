@@ -75,8 +75,7 @@ export default function GenericToolScreen({ title, subtitle, price, backgroundIm
     // Nombramos 'pickerOptions' para no confundir con las 'options' de estilos
     const pickerOptions: ImagePicker.ImagePickerOptions = {
       mediaTypes: ImagePicker.MediaTypeOptions.Images, 
-      allowsEditing: true, 
-      aspect: [4, 5], 
+      allowsEditing: false, // 🔥 FIX: Desactiva el crop para evitar glitches y permitir fotos completas
       quality: 0.8 
     };
 
@@ -268,7 +267,7 @@ export default function GenericToolScreen({ title, subtitle, price, backgroundIm
                               <Image 
                                 source={{ uri: opt.image }} 
                                 className={`w-full h-full ${isSelected ? 'opacity-100' : 'opacity-70'}`} 
-                                resizeMode="cover" 
+                                resizeMode="contain" 
                               />
                               <LinearGradient 
                                 colors={['transparent', 'rgba(0,0,0,0.8)']} 

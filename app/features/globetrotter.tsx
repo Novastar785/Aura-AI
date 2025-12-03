@@ -1,10 +1,12 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next'; // ✨
 import GenericToolScreen, { ToolOption } from '../../components/GenericToolScreen';
+import { useRemoteConfig } from '../../hooks/useRemoteConfig';
 
 export default function GlobetrotterScreen() {
   const { t } = useTranslation(); // ✨
-  
+  const { getCost } = useRemoteConfig(); // <--- Usar Hook
+
   const options: ToolOption[] = [
     { 
       id: 'santorini', 
@@ -27,7 +29,7 @@ export default function GlobetrotterScreen() {
     <GenericToolScreen 
       title={t('tools.globetrotter.title')} // ✨
       subtitle={t('feature_descriptions.globetrotter')} // ✨
-      price={2}
+      price={getCost('globetrotter', 2)} // <--- USAR ID DE LA DB
       backgroundImage="https://rizzflows.com/img_aura/Image_fx(12).png"
       apiMode="globetrotter"
       options={options}

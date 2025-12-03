@@ -50,7 +50,7 @@ export default function TryOnToolScreen({ title, subtitle, price, backgroundImag
 
     const options: ImagePicker.ImagePickerOptions = {
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
+      allowsEditing: false, // 🔥 FIX: Desactiva el crop para permitir fotos 9:16 completas y evitar glitches de UI
       quality: 0.8,
     };
 
@@ -187,7 +187,11 @@ export default function TryOnToolScreen({ title, subtitle, price, backgroundImag
           >
             {userImage ? (
               <>
-                <Image source={{ uri: userImage }} className="w-full h-full opacity-80" resizeMode="cover" />
+                {/* -----------------------------------------------------------------
+                    CORRECCIÓN 2: Cambiamos 'cover' a 'contain' para que la foto
+                    quepa entera dentro del marco sin cortarse (zoom out automático).
+                   ----------------------------------------------------------------- */}
+                <Image source={{ uri: userImage }} className="w-full h-full opacity-80" resizeMode="contain" />
                 <View className="absolute top-3 right-3 bg-indigo-500 rounded-full p-1"><CheckCircle2 size={16} color="white" /></View>
                 <View className="absolute bottom-0 w-full bg-black/60 p-2 items-center"><Text className="text-white font-bold text-xs">{t('tryon_tool.user_photo')}</Text></View>
               </>
@@ -209,6 +213,7 @@ export default function TryOnToolScreen({ title, subtitle, price, backgroundImag
             </View>
           </View>
 
+          {/* TARJETA 2: PRENDA */}
           <TouchableOpacity 
             onPress={() => openPicker('garment')}
             activeOpacity={0.9}
@@ -216,7 +221,8 @@ export default function TryOnToolScreen({ title, subtitle, price, backgroundImag
           >
             {garmentImage ? (
               <>
-                <Image source={{ uri: garmentImage }} className="w-full h-full opacity-80" resizeMode="cover" />
+                {/* CORRECCIÓN 2: También aquí usamos 'contain' */}
+                <Image source={{ uri: garmentImage }} className="w-full h-full opacity-80" resizeMode="contain" />
                 <View className="absolute top-3 right-3 bg-purple-500 rounded-full p-1"><CheckCircle2 size={16} color="white" /></View>
                 <View className="absolute bottom-0 w-full bg-black/60 p-2 items-center"><Text className="text-white font-bold text-xs">{t('tryon_tool.outfit_photo')}</Text></View>
               </>

@@ -9,23 +9,6 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// --- MAPA DE COSTOS (Categorías Principales) ---
-const FEATURE_COSTS: Record<string, number> = {
-  tryon: 3,
-  
-  // Mantenemos AMBOS para seguridad (evitar cobros erróneos por typos)
-  stylist: 2, // Para IDs como "stylist_rock", "stylist_urban" (Visto en gemini.ts)
-  stylish: 2, // Para IDs como "stylish_rock" (Tu preferencia)
-  
-  hairstudio: 2,
-  fitness: 3,
-  glowup: 2,
-  luxury: 2,
-  socials: 2,
-  globetrotter: 2,
-  headshot: 3
-};
-
 serve(async (req) => {
   // 1. Manejo de permisos (CORS)
   if (req.method === "OPTIONS") {
@@ -33,7 +16,7 @@ serve(async (req) => {
   }
 
   try {
-    // Inicializar cliente Supabase para verificar créditos
+    // Inicializar cliente Supabase para verificar créditos y leer prompts
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
@@ -46,62 +29,84 @@ serve(async (req) => {
       throw new Error("ERROR CRÍTICO: No encontré la llave GEMINI_API_KEY_AURA en los secretos de Supabase.");
     }
 
-    // 3. Recibimos los datos que envía tu celular
-    const { prompt, imageBase64, garmentBase64, modelName, user_id, feature_id } = await req.json();
+    // 3. Recibimos los datos (NOTA: Ya no recibimos 'prompt' texto, sino IDs)
+    const { imageBase64, garmentBase64, modelName, user_id, feature_id, variant } = await req.json();
 
-    if (!prompt || !imageBase64) {
-      throw new Error("Faltan datos: No llegó el prompt o la imagen principal.");
+    if (!imageBase64 || !feature_id) {
+      throw new Error("Faltan datos: No llegó la imagen principal o el feature_id.");
     }
 
-    // --- INICIO BLOQUE DE CRÉDITOS INTELIGENTE ---
     if (!user_id) {
         throw new Error("Usuario no identificado (Falta user_id para procesar créditos)");
     }
 
-    // LÓGICA DE COBRO DINÁMICA
-    // Paso A: Definir costo por defecto alto por seguridad
-    let cost = 3; 
+    // --- INICIO BLOQUE DE CRÉDITOS Y PROMPT (MIGRADO A DB) ---
+    
+    // A. Construir ID de búsqueda
+    // Normalizamos a minúsculas y construimos el ID compuesto si existe variante (ej: "stylist_rock")
+    let searchId = variant ? `${feature_id}_${variant}` : feature_id;
+    searchId = searchId.toLowerCase().trim();
 
-    // Paso B: Normalizar el feature_id (minusculas y sin espacios extra)
-    const normalizedId = (feature_id || "").toLowerCase().trim();
+    console.log(`🔍 Buscando configuración en DB para: ${searchId}`);
 
-    // Paso C: Buscar precio
-    if (normalizedId in FEATURE_COSTS) {
-      // 1. Búsqueda exacta (Ej: "tryon")
-      cost = FEATURE_COSTS[normalizedId];
-    } else {
-      // 2. Búsqueda por Categoría (Ej: "stylish_rock" -> busca "stylish")
-      const category = normalizedId.split('_')[0]; // Toma la primera parte antes del guion bajo
-      if (category in FEATURE_COSTS) {
-        cost = FEATURE_COSTS[category];
-        console.log(`ℹ️ Variante detectada: "${normalizedId}" cobrará precio base de "${category}" (${cost} créditos)`);
-      } else {
-        console.log(`⚠️ Feature "${normalizedId}" no encontrado en lista. Cobrando default: ${cost}`);
-      }
+    // B. Buscar en la tabla 'ai_prompts'
+    let { data: promptData, error: dbError } = await supabase
+      .from('ai_prompts')
+      .select('*')
+      .eq('id', searchId)
+      .single();
+
+    // C. Lógica de Fallback (Herencia)
+    // Si no encontramos la variante específica (ej: 'stylist_rock'), buscamos el padre ('stylist')
+    if (!promptData && searchId.includes('_')) {
+        const parentId = searchId.split('_')[0];
+        console.log(`⚠️ Variante ${searchId} no encontrada. Intentando fallback a padre: ${parentId}`);
+        
+        const { data: parentData } = await supabase
+            .from('ai_prompts')
+            .select('*')
+            .eq('id', parentId)
+            .single();
+            
+        promptData = parentData;
     }
 
-    console.log(`💰 Intentando cobrar ${cost} créditos al usuario ${user_id} por ${normalizedId}...`);
+    if (!promptData) {
+        // Si falla la búsqueda (ni hijo ni padre), lanzamos error para no cobrar por algo que no existe
+        throw new Error(`Configuración de prompt no encontrada para el ID: ${searchId}`);
+    }
+
+    // D. Determinar Costo desde la DB
+    const cost = promptData.cost || 2; // Default de seguridad si la columna viniera vacía
+
+    console.log(`💰 Cobrando ${cost} créditos al usuario ${user_id}...`);
     
-    // Llamar a la función de base de datos segura
+    // E. Ejecutar Cobro (RPC existente)
     const { data: transaction, error: txError } = await supabase.rpc('deduct_credits', {
       p_user_id: user_id,
       p_cost: cost
     });
 
     if (txError) {
-        console.error("Error en DB:", txError);
+        console.error("Error en DB (Cobro):", txError);
         throw new Error(`Error verificando saldo: ${txError.message}`);
     }
     
-    // Verificar si el cobro fue exitoso
     if (!transaction || !transaction.success) {
       return new Response(JSON.stringify({ error: "Saldo insuficiente", code: "INSUFFICIENT_CREDITS" }), {
         status: 402, 
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    console.log("✅ Cobro exitoso. Procediendo con Gemini...");
-    // --- FIN BLOQUE DE CRÉDITOS ---
+    console.log("✅ Cobro exitoso. Preparando Prompt...");
+
+    // F. Construir el Prompt Final usando los datos de la DB
+    let finalPrompt = promptData.system_prompt;
+    if (promptData.negative_prompt) {
+        finalPrompt += `\n\nNEGATIVE PROMPT (Avoid these elements strictly): ${promptData.negative_prompt}`;
+    }
+
+    // --- FIN BLOQUE CRÉDITOS Y PROMPT ---
 
 
     // 4. Conectamos con Google (Lado Servidor)
@@ -109,9 +114,9 @@ serve(async (req) => {
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: modelId });
 
-    // 5. Preparamos el contenido para la IA
-    const contentParts = [
-      prompt,
+    // 5. Preparamos el contenido para la IA usando el finalPrompt recuperado
+    const contentParts: any[] = [
+      finalPrompt,
       { inlineData: { data: imageBase64, mimeType: "image/jpeg" } } 
     ];
 
