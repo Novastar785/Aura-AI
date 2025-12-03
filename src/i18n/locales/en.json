@@ -47,7 +47,10 @@
     "generating": "Generating magic...",
     "upload_photo": "Upload Photo",
     "select_image": "Select Image",
-    "choose_source": "Choose source"
+    "choose_source": "Choose source",
+    "insufficient_title": "Insufficient Credits",
+    "insufficient_msg": "You don't have enough credits to generate this image.",
+    "go_store": "Go to Store"
   },
   "generic_tool": {
     "result_title": "Your New Look!",

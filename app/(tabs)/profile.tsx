@@ -1,5 +1,5 @@
 import { LinearGradient } from 'expo-linear-gradient';
-import { useFocusEffect, useRouter } from 'expo-router'; // ✅ Agregado useFocusEffect
+import { useFocusEffect, useRouter } from 'expo-router';
 import {
   ChevronRight,
   CreditCard,
@@ -7,17 +7,18 @@ import {
   HelpCircle,
   Infinity as InfinityIcon,
   Lock,
-  RefreshCcw, // ✅ Agregado icono de refrescar
+  RefreshCcw,
   Rocket,
   User
 } from 'lucide-react-native';
-import React, { useCallback, useState } from 'react'; // ✅ Agregados hooks
+import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Linking, ScrollView, StatusBar, Text, TouchableOpacity, View } from 'react-native';
-import Purchases from 'react-native-purchases'; // ✅ Import necesario
+import Purchases from 'react-native-purchases';
 import RevenueCatUI from 'react-native-purchases-ui';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { getUserCredits, restorePurchases } from '../../src/services/revenueCat'; // ✅ Importamos tus servicios
+import { supabase } from '../../src/config/supabase'; // ✅ IMPORTANTE: Importamos Supabase directamente
+import { restorePurchases } from '../../src/services/revenueCat';
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -28,7 +29,7 @@ export default function ProfileScreen() {
   const [userId, setUserId] = useState("");
   const [isSubscribed, setIsSubscribed] = useState(false);
 
-  // --- CARGA DE DATOS (Cada vez que entras a la pantalla) ---
+  // --- CARGA DE DATOS ---
   useFocusEffect(
     useCallback(() => {
       loadData();
@@ -37,28 +38,48 @@ export default function ProfileScreen() {
 
   const loadData = async () => {
     try {
-      // 1. Obtener Info del Cliente de RevenueCat
+      // 1. Obtener Info del Cliente de RevenueCat (FUENTE DE LA VERDAD)
       const customerInfo = await Purchases.getCustomerInfo();
-      const appUserID = await Purchases.getAppUserID(); // ✅ ID correcto
+      const appUserID = await Purchases.getAppUserID(); 
+      
+      console.log("🔍 Profile - RevenueCat ID:", appUserID); // Debug para ver el ID
       setUserId(appUserID);
 
-      // 2. Verificar Suscripción (Ajusta 'pro' si tu entitlement se llama diferente)
+      // 2. Verificar Suscripción
       if (customerInfo.entitlements.active['pro']) {
           setIsSubscribed(true);
       } else {
           setIsSubscribed(false);
       }
 
-      // 3. Obtener Créditos de Supabase
-      const userCredits = await getUserCredits();
-      setCredits(userCredits);
+      // 3. Obtener Créditos de Supabase USANDO EL ID DE REVENUECAT
+      // ⚠️ Reemplazamos getUserCredits() por una consulta directa y segura
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('credits') // Asegúrate de que tu columna se llama 'credits'
+        .eq('id', appUserID) // 🔥 CLAVE: Usamos el ID de RevenueCat, no el de Auth
+        .single();
+
+      if (data) {
+        // Asumimos que 'credits' es el total. Si tienes lógica de packs vs subs, ajusta aquí.
+        // Por defecto, asignamos todo al 'pack' o 'standard' para que se vea en el UI.
+        setCredits({ 
+            sub: 0, // Si tienes una columna 'credits_sub', úsala aquí
+            pack: data.credits || 0, 
+            total: data.credits || 0 
+        });
+      } else {
+        console.log("⚠️ No se encontró perfil para este ID (Usuario nuevo o error)", error);
+        setCredits({ sub: 0, pack: 0, total: 0 });
+      }
+
     } catch (e) {
       console.log("Error cargando perfil", e);
     }
   };
 
   // --- FUNCIONES DE REVENUECAT ---
-  const handleRestore = async () => { // ✅ Nueva función de restaurar
+  const handleRestore = async () => {
     try {
         await restorePurchases();
         await loadData();
@@ -86,7 +107,7 @@ export default function ProfileScreen() {
     }
   };
 
-  // --- FUNCIÓN DE SOPORTE (Mailto) ---
+  // --- FUNCIÓN DE SOPORTE ---
   const handleSupport = async () => {
     const email = 'info@rizzflows.com';
     const subject = t('profile.subject');
@@ -118,12 +139,12 @@ export default function ProfileScreen() {
       iconColor: '#8b5cf6', 
       bgIcon: 'bg-violet-500/10'
     },
-    { // ✅ Nuevo botón Restaurar
+    { 
       icon: RefreshCcw, 
       label: "Restaurar Compras", 
       action: handleRestore,
       subtitle: "Recuperar saldo y suscripción",
-      iconColor: '#14b8a6', // Teal
+      iconColor: '#14b8a6', 
       bgIcon: 'bg-teal-500/10'
     },
   ];
@@ -181,9 +202,8 @@ export default function ProfileScreen() {
               </View>
             </View>
             
-            {/* ✅ Nombre de usuario usando el ID */}
             <Text className="text-white text-xl font-bold mt-2 font-mono">
-               {userId ? `User: ${userId.substring(0, 8)}...` : "Cargando..."}
+               {userId ? `ID: ${userId.substring(0, 8)}...` : "Cargando..."}
             </Text>
             
             <Text className="text-indigo-200/80 text-sm mt-1 font-medium tracking-widest uppercase">
@@ -191,24 +211,21 @@ export default function ProfileScreen() {
             </Text>
           </View>
 
-          {/* ESTADÍSTICAS RÁPIDAS (MEJORADAS: Total, Premium y Standard) */}
+          {/* ESTADÍSTICAS RÁPIDAS */}
           <View className="mx-6 mb-8 bg-white/5 rounded-3xl p-4 border border-white/10 backdrop-blur-md">
             
-            {/* Cabecera con el Total */}
             <View className="items-center mb-3 border-b border-white/5 pb-3">
                  <Text className="text-zinc-400 text-[10px] uppercase tracking-widest mb-1">Total Balance</Text>
                  <Text className="text-4xl font-bold text-white shadow-sm">{credits.total}</Text>
             </View>
 
             <View className="flex-row">
-                {/* Lado Izquierdo: Premium (Suscripción) */}
                 <View className="flex-1 items-center border-r border-white/10">
                   <Text className="text-xl font-bold text-white">{credits.sub}</Text>
                   <Text className="text-amber-300 text-[10px] font-bold uppercase tracking-wider mt-1">Premium</Text>
                   <Text className="text-zinc-500 text-[8px] uppercase tracking-widest">credits</Text>
                 </View>
 
-                {/* Lado Derecho: Standard (Packs) */}
                 <View className="flex-1 items-center">
                   <Text className="text-xl font-bold text-white">{credits.pack}</Text>
                   <Text className="text-indigo-300 text-[10px] font-bold uppercase tracking-wider mt-1">Standard</Text>
@@ -250,7 +267,6 @@ export default function ProfileScreen() {
   );
 }
 
-// Componente auxiliar mejorado
 function MenuRow({ item, isLast }: { item: any, isLast: boolean }) {
   return (
     <TouchableOpacity 
@@ -258,7 +274,6 @@ function MenuRow({ item, isLast }: { item: any, isLast: boolean }) {
       className={`flex-row items-center justify-between p-4 active:bg-white/5 ${!isLast ? 'border-b border-white/5' : ''}`}
     >
       <View className="flex-row items-center gap-4 flex-1">
-        {/* Icono con fondo de color suave */}
         <View className={`w-10 h-10 rounded-full items-center justify-center ${item.bgIcon}`}>
           <item.icon size={20} color={item.iconColor} />
         </View>

@@ -39,7 +39,7 @@ export default function StylistScreen() {
     <GenericToolScreen 
       title={t('tools.stylist.title')} // ✨
       subtitle={t('feature_descriptions.stylist')} // ✨
-      price={15}
+      price={2}
       // Imagen de fondo general de la pantalla
       backgroundImage="https://rizzflows.com/img_aura/Image_fx(3).png"
       apiMode="stylist"

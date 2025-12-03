@@ -47,7 +47,10 @@
     "generating": "Gerando mágica...",
     "upload_photo": "Enviar Foto",
     "select_image": "Selecionar Imagem",
-    "choose_source": "Escolha a origem"
+    "choose_source": "Escolha a origem",
+    "insufficient_title": "Créditos Insuficientes",
+    "insufficient_msg": "Você não tem créditos suficientes para gerar esta imagem.",
+    "go_store": "Ir para a Loja"
   },
   "generic_tool": {
     "result_title": "Seu Novo Visual!",

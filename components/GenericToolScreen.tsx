@@ -103,9 +103,25 @@ export default function GenericToolScreen({ title, subtitle, price, backgroundIm
       } else {
         Alert.alert(t('common.error'), t('common.error_generation'));
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      Alert.alert(t('common.error'), t('common.error_technical'));
+      
+      // ✅ DETECCIÓN DE SALDO INSUFICIENTE
+      if (error.message === 'INSUFFICIENT_CREDITS') {
+        Alert.alert(
+          t('common.insufficient_title'),
+          t('common.insufficient_msg'),
+          [
+            { text: t('common.cancel'), style: "cancel" },
+            { 
+              text: t('common.go_store'), 
+              onPress: () => router.push('/(tabs)/store') // 🛒 Redirige a la tienda
+            }
+          ]
+        );
+      } else {
+        Alert.alert(t('common.error'), t('common.error_technical'));
+      }
     } finally {
       setIsProcessing(false);
       setLoadingStage("");

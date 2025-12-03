@@ -8,7 +8,7 @@ export default function LuxuryScreen() {
     <GenericToolScreen 
       title={t('tools.luxury.title')} // ✨
       subtitle={t('feature_descriptions.luxury')} // ✨
-      price={25}
+      price={2}
       backgroundImage="https://rizzflows.com/img_aura/bmw%20rojo.jpg"
       apiMode="luxury"
     />

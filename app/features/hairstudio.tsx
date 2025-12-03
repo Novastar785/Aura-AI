@@ -63,7 +63,7 @@ export default function HairStudioScreen() {
     <GenericToolScreen 
       title={t('tools.hairstudio.title')} // ✨
       subtitle={t('feature_descriptions.hairstudio')} // ✨
-      price={15}
+      price={2}
       backgroundImage="https://rizzflows.com/img_aura/Image_fx(13).png"
       apiMode="hairstudio"
       options={options}

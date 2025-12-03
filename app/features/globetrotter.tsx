@@ -27,7 +27,7 @@ export default function GlobetrotterScreen() {
     <GenericToolScreen 
       title={t('tools.globetrotter.title')} // ✨
       subtitle={t('feature_descriptions.globetrotter')} // ✨
-      price={20}
+      price={2}
       backgroundImage="https://rizzflows.com/img_aura/Image_fx(12).png"
       apiMode="globetrotter"
       options={options}

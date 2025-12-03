@@ -36,7 +36,7 @@ export default function HomeScreen() {
      route: '/features/tryon', 
      title: t('tools.tryon.title'), 
      subtitle: t('tools.tryon.subtitle'), 
-     price: '20', 
+     price: '3', 
      image: 'https://rizzflows.com/img_aura/Vtryon.png', 
      badge: 'FUN' 
    },
@@ -45,7 +45,7 @@ export default function HomeScreen() {
      route: '/features/stylist', 
      title: t('tools.stylist.title'), 
      subtitle: t('tools.stylist.subtitle'), 
-     price: '15', 
+     price: '2', 
      image: 'https://rizzflows.com/img_aura/Image_fx(3).png', 
      badge: 'TRENDING' 
    },
@@ -54,7 +54,7 @@ export default function HomeScreen() {
      route: '/features/hairstudio', 
      title: t('tools.hairstudio.title'), 
      subtitle: t('tools.hairstudio.subtitle'), 
-     price: '15', 
+     price: '2', 
      image: 'https://rizzflows.com/img_aura/Image_fx(13).png', 
      badge: 'NEW' 
    },
@@ -63,7 +63,7 @@ export default function HomeScreen() {
      route: '/features/fitness', 
      title: t('tools.fitness.title'), 
      subtitle: t('tools.fitness.subtitle'), 
-     price: '20', 
+     price: '3', 
      image: 'https://rizzflows.com/img_aura/Image_fx(14).png', 
      badge: '' 
    },
@@ -72,7 +72,7 @@ export default function HomeScreen() {
      route: '/features/glowup', 
      title: t('tools.glowup.title'), 
      subtitle: t('tools.glowup.subtitle'), 
-     price: '10', 
+     price: '2', 
      image: 'https://rizzflows.com/img_aura/Image_fx(8).png', 
      badge: '' 
    },
@@ -81,7 +81,7 @@ export default function HomeScreen() {
      route: '/features/luxury', 
      title: t('tools.luxury.title'), 
      subtitle: t('tools.luxury.subtitle'), 
-     price: '25', 
+     price: '2', 
      image: 'https://rizzflows.com/img_aura/bmw%20rojo.jpg', 
      badge: 'VIRAL' 
    },
@@ -90,7 +90,7 @@ export default function HomeScreen() {
      route: '/features/socials', 
      title: t('tools.socials.title'), 
      subtitle: t('tools.socials.subtitle'), 
-     price: '15', 
+     price: '2', 
      image: 'https://rizzflows.com/img_aura/Image_fx(10).png', 
      badge: '' 
    },
@@ -99,7 +99,7 @@ export default function HomeScreen() {
      route: '/features/globetrotter', 
      title: t('tools.globetrotter.title'), 
      subtitle: t('tools.globetrotter.subtitle'), 
-     price: '20', 
+     price: '2', 
      image: 'https://rizzflows.com/img_aura/Image_fx(12).png', 
      badge: 'NEW' 
    }, 
@@ -108,7 +108,7 @@ export default function HomeScreen() {
      route: '/features/headshot', 
      title: t('tools.headshot.title'), 
      subtitle: t('tools.headshot.subtitle'), 
-     price: '20', 
+     price: '3', 
      image: 'https://rizzflows.com/img_aura/Image_fx(1).png', 
      badge: 'POPULAR' 
    },

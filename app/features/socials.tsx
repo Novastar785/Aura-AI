@@ -8,7 +8,7 @@ export default function StylistScreen() {
     <GenericToolScreen 
       title={t('tools.socials.title')} // ✨
       subtitle={t('feature_descriptions.socials')} // ✨
-      price={15}
+      price={2}
       backgroundImage="https://rizzflows.com/img_aura/Image_fx(10).png"
       apiMode="socials"
     />

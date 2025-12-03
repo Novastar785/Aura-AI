@@ -1,31 +1,35 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-// --- CONFIGURACIÓN DE TUS PLANES ---
-// Asegúrate de que estos IDs coincidan con los de RevenueCat
+// --- ⚙️ CONFIGURACIÓN DE TUS PLANES (El cerebro de los créditos) ---
+// CLAVE (Izquierda): El "Identifier" exacto que pusiste en RevenueCat / App Store.
+// VALOR (Derecha): La cantidad de créditos a otorgar.
+
 const CREDIT_MAP = {
-  // Suscripciones (Use it or lose it)
-  "aura_weekly_premium": 150,
-  "aura_monthly_premium": 700,
-  
-  // Packs (Se suman)
-  "aura_pack_50": 50,
-  "aura_pack_100": 100
+  // SUSCRIPCIONES (Recurrentes - "Use it or lose it")
+  "aura_weekly_premium": 150,   // Plan Semanal
+  "aura_monthly_premium": 700,  // Plan Mensual
+  "aura_yearly_premium": 10000, // (Opcional) Plan Anual
+
+  // PACKS (Pago único - Se suman)
+  "aura_pack_50": 50,    // Pack Pequeño
+  "aura_pack_100": 100,  // Pack Mediano
+  "aura_pack_500": 500   // (Opcional) Pack Grande
 };
 
 serve(async (req) => {
   try {
-    // 1. Verificar seguridad (Token simple en la URL o Header)
-    // Para simplificar, asumiremos que configuras el Webhook en RC con un secreto en la URL
-    // Ej: https://tu-proyecto.functions.supabase.co/revenuecat-webhook?secret=MI_SECRETO_SEGURO
-    
+    // 1. Verificar seguridad (Token secreto en la URL)
+    // URL esperada: .../revenuecat-webhook?secret=MI_SECRETO_AURA_123
     const url = new URL(req.url);
     const secret = url.searchParams.get("secret");
-    if (secret !== "MI_SECRETO_AURA_123") { // Cambia esto por algo difícil
+
+    // ¡CAMBIA ESTO POR TU SECRETO REAL!
+    if (secret !== "MI_SECRETO_AURA_123") { 
       return new Response("Unauthorized", { status: 401 });
     }
 
-    // 2. Inicializar Supabase Admin (para poder escribir en la DB)
+    // 2. Inicializar Supabase Admin
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
@@ -42,83 +46,93 @@ serve(async (req) => {
     
     console.log(`🔔 Evento recibido: ${type} para ${appUserId} (${productId})`);
 
-    // 3. Lógica de Negocio según el Evento
-    
-    // CASO A: COMPRA INICIAL O RENOVACIÓN DE SUSCRIPCIÓN
+    // 3. Lógica de Negocio
+
+    // --- CASO A: SUSCRIPCIONES (Renovación o Compra Inicial) ---
+    // Si el producto está en el mapa y es un evento de renovación/compra/cambio
     if (type === "INITIAL_PURCHASE" || type === "RENEWAL" || type === "PRODUCT_CHANGE") {
       
-      const creditsToGive = CREDIT_MAP[productId];
+      const creditsToGive = CREDIT_MAP[productId as keyof typeof CREDIT_MAP];
       
-      // Si es una suscripción conocida
-      if (creditsToGive && (productId.includes("weekly") || productId.includes("monthly"))) {
+      // Verificamos si es una suscripción (por convención de nombre o lista explícita)
+      // Asumimos que todo lo que no sea "pack" es suscripción en este mapa simple
+      if (creditsToGive && !productId.includes("pack")) {
         console.log(`💎 Reseteando créditos de suscripción a: ${creditsToGive}`);
         
-        // UPSERT: Si no existe el usuario lo crea, si existe lo actualiza
+        // UPSERT: Sobrescribe subscription_credits (Use it or lose it)
         const { error } = await supabaseAdmin
           .from("user_credits")
           .upsert({ 
             user_id: appUserId, 
-            subscription_credits: creditsToGive, // SOBRESCRIBE (Use it or lose it)
+            subscription_credits: creditsToGive, 
             updated_at: new Date()
-          });
+          }, { onConflict: 'user_id' });
           
-        if (error) throw error;
+        if (error) {
+            console.error("Error DB:", error);
+            throw error;
+        }
       }
-      // Si es una compra de Pack (a veces llega como Initial Purchase si es consumible)
+      // Si por alguna razón un pack llega como INITIAL_PURCHASE (a veces pasa en sandbox)
       else if (creditsToGive && productId.includes("pack")) {
          await addPackCredits(supabaseAdmin, appUserId, creditsToGive);
       }
     }
 
-    // CASO B: COMPRA DE PACKS (Consumibles - Non Renewing)
+    // --- CASO B: PACKS (Compras no recurrentes) ---
     if (type === "NON_RENEWING_PURCHASE") {
-      const creditsToGive = CREDIT_MAP[productId];
+      const creditsToGive = CREDIT_MAP[productId as keyof typeof CREDIT_MAP];
       if (creditsToGive) {
         await addPackCredits(supabaseAdmin, appUserId, creditsToGive);
       }
     }
 
-    // CASO C: EXPIRACIÓN (Opcional: Poner saldo en 0 inmediatamente)
+    // --- CASO C: EXPIRACIÓN ---
     if (type === "EXPIRATION") {
-       // Opcional: Podrías forzar subscription_credits a 0 aquí si quieres ser estricto
-       // await supabaseAdmin.from("user_credits").update({ subscription_credits: 0 }).eq("user_id", appUserId);
+       console.log("🚫 Suscripción expirada. Removiendo créditos recurrentes.");
+       // Opcional: Poner a 0 solo si quieres ser estricto inmediatamente
+       await supabaseAdmin.from("user_credits").update({ subscription_credits: 0 }).eq("user_id", appUserId);
     }
 
     return new Response(JSON.stringify({ received: true }), {
       headers: { "Content-Type": "application/json" },
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error("❌ Error processing webhook:", error);
     return new Response(JSON.stringify({ error: error.message }), { status: 500 });
   }
 });
 
-// Helper para sumar packs (ya que estos NO se sobrescriben, se suman)
-async function addPackCredits(supabase, userId, amount) {
-  console.log(`➕ Sumando ${amount} créditos de pack`);
+// Función auxiliar para SUMAR créditos de pack (sin borrar los de suscripción)
+async function addPackCredits(supabase: any, userId: string, amount: number) {
+  console.log(`➕ Sumando ${amount} créditos de pack al usuario ${userId}`);
   
-  // Primero obtenemos el usuario actual para ver si existe
-  const { data: current } = await supabase.from("user_credits").select("pack_credits").eq("user_id", userId).single();
+  // 1. Obtener saldo actual
+  const { data: current, error: fetchError } = await supabase
+    .from("user_credits")
+    .select("pack_credits")
+    .eq("user_id", userId)
+    .single();
   
-  const currentPack = current ? current.pack_credits : 0;
+  // Si da error y no es "no rows", lanzamos error
+  if (fetchError && fetchError.code !== 'PGRST116') {
+      console.error("Error fetching user:", fetchError);
+  }
+
+  const currentPack = current ? (current.pack_credits || 0) : 0;
   const newTotal = currentPack + amount;
 
-  const { error } = await supabase
-    .from("user_credits")
-    .upsert({
-      user_id: userId,
-      pack_credits: newTotal,
-      updated_at: new Date()
-    }, { onConflict: 'user_id' }); // En upsert, esto combina con los datos existentes si no especificamos columnas, pero aquí queremos asegurar la suma.
-    
-    // Nota: El upsert simple arriba podría borrar sub_credits si no tenemos cuidado.
-    // Forma más segura para packs: RPC o Update específico si existe.
-    // Para simplificar este script, haremos un update directo si existe, o insert si no.
-    
-    if (current) {
-        await supabase.from("user_credits").update({ pack_credits: newTotal }).eq("user_id", userId);
-    } else {
-        await supabase.from("user_credits").insert({ user_id: userId, pack_credits: newTotal, subscription_credits: 0 });
-    }
+  // 2. Guardar nuevo saldo
+  if (current) {
+      // Usuario existe: Actualizamos solo pack_credits
+      await supabase.from("user_credits").update({ pack_credits: newTotal, updated_at: new Date() }).eq("user_id", userId);
+  } else {
+      // Usuario nuevo: Insertamos fila
+      await supabase.from("user_credits").insert({ 
+          user_id: userId, 
+          pack_credits: newTotal, 
+          subscription_credits: 0 
+      });
+  }
 }

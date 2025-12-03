@@ -22,7 +22,7 @@ export default function FitnessScreen() {
     <GenericToolScreen 
       title={t('tools.fitness.title')} // ✨
       subtitle={t('feature_descriptions.fitness')} // ✨
-      price={20}
+      price={3}
       backgroundImage="https://rizzflows.com/img_aura/Image_fx(14).png"
       apiMode="fitness"
       options={options}

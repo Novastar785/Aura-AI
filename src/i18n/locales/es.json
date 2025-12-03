@@ -47,7 +47,10 @@
     "generating": "Generando magia...",
     "upload_photo": "Subir Foto",
     "select_image": "Seleccionar Imagen",
-    "choose_source": "Elige el origen"
+    "choose_source": "Elige el origen",
+    "insufficient_title": "Saldo Insuficiente",
+    "insufficient_msg": "No tienes suficientes créditos para generar esta imagen.",
+    "go_store": "Ir a la Tienda"
   },
   "generic_tool": {
     "result_title": "¡Tu Nuevo Look!",

@@ -78,8 +78,23 @@ export default function TryOnToolScreen({ title, subtitle, price, backgroundImag
       const generated = await generateAIImage(userImage, 'tryon', null, garmentImage);
       if (generated) setResultImage(generated);
       else Alert.alert(t('common.error'), t('common.error_generation'));
-    } catch (e) {
-      Alert.alert(t('common.error'), t('common.error_connection'));
+    } catch (error: any) { 
+      // ✅ DETECCIÓN DE SALDO INSUFICIENTE
+      if (error.message === 'INSUFFICIENT_CREDITS') {
+        Alert.alert(
+          t('common.insufficient_title'),
+          t('common.insufficient_msg'),
+          [
+            { text: t('common.cancel'), style: "cancel" },
+            { 
+              text: t('common.go_store'), 
+              onPress: () => router.push('/(tabs)/store') 
+            }
+          ]
+        );
+      } else {
+        Alert.alert(t('common.error'), t('common.error_connection'));
+      }
     } finally {
       setIsProcessing(false);
     }

@@ -8,7 +8,7 @@ export default function StylistScreen() {
     <GenericToolScreen 
       title={t('tools.headshot.title')} // ✨
       subtitle={t('feature_descriptions.headshot')} // ✨
-      price={15}
+      price={3}
       backgroundImage="https://rizzflows.com/img_aura/Image_fx(1).png"
       apiMode="headshot"
     />
