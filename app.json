@@ -5,22 +5,41 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "mobile",
-    "userInterfaceStyle": "automatic",
+    "scheme": "auraai",
+    "userInterfaceStyle": "dark",
     "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/images/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#000000"
+    },
     "ios": {
-      "supportsTablet": true
+      "buildNumber": "1",
+      "supportsTablet": false,
+      "bundleIdentifier": "com.auraai.mobile",
+      "userInterfaceStyle": "dark",
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "Aura AI needs access to your photo library to allow you to select photos for analysis and generation.",
+        "NSCameraUsageDescription": "Aura AI needs access to your camera to let you take photos for AI generation.",
+        "NSMicrophoneUsageDescription": "Aura AI needs access to your microphone for video features.",
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "backgroundColor": "#000000",
+        "foregroundImage": "./assets/images/adaptive-icon.png"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.auraai.mobile"
+      "package": "com.auraai.mobile",
+      "versionCode": 1,
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "output": "static",
@@ -43,17 +62,17 @@
       [
         "expo-media-library",
         {
-          "photosPermission": "Permite a Aura AI acceder a tus fotos para guardar tus ediciones.",
-          "savePhotosPermission": "Permite a Aura AI guardar tus nuevas fotos en la galería.",
+          "photosPermission": "Allow Aura AI to access your photos to save your edits.",
+          "savePhotosPermission": "Allow Aura AI to save your generated images to your gallery.",
           "isAccessMediaLocationEnabled": false
         }
       ],
       [
         "expo-image-picker",
         {
-          "photosPermission": "Necesitamos acceso a tus fotos para que elijas cuál editar.",
-          "cameraPermission": "Necesitamos acceso a la cámara para tomar tu foto de perfil.",
-          "microphonePermission": "Permite a Aura AI acceder al micrófono."
+          "photosPermission": "Aura AI needs access to your photos so you can choose which one to edit.",
+          "cameraPermission": "Aura AI needs access to the camera to take a picture to edit.",
+          "microphonePermission": "Allow Aura AI to access the microphone."
         }
       ]
     ],

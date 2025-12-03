@@ -3,9 +3,11 @@ import "../src/i18n";
 import "./global.css";
 
 import * as NavigationBar from 'expo-navigation-bar';
+import * as SplashScreen from 'expo-splash-screen';
 import * as SystemUI from 'expo-system-ui';
-import { useEffect } from "react";
-import { Platform } from "react-native";
+import LottieView from 'lottie-react-native';
+import { useEffect, useRef, useState } from "react";
+import { Platform, StyleSheet, View } from "react-native";
 
 // 1. Importamos las herramientas de tema de React Navigation
 import { DarkTheme, Theme, ThemeProvider } from '@react-navigation/native';
@@ -14,53 +16,95 @@ import { DarkTheme, Theme, ThemeProvider } from '@react-navigation/native';
 import Purchases from 'react-native-purchases';
 import { REVENUECAT_API_KEY } from '../src/config/secrets';
 
-// 2. Definimos el tema "Aura" (Forzamos el fondo negro en el motor de navegación)
+// Mantiene el splash nativo visible hasta que le digamos lo contrario
+SplashScreen.preventAutoHideAsync();
+
+// 2. Definimos el tema "Aura"
 const AuraTheme: Theme = {
-  ...DarkTheme, // Heredamos del tema oscuro base
+  ...DarkTheme, 
   colors: {
     ...DarkTheme.colors,
-    background: '#0f0f0f', // <--- ESTO ELIMINA EL FLICKER REAL (Fondo del Navigator)
-    card: '#0f0f0f',       // Fondo de las barras de navegación
+    background: '#0f0f0f', 
+    card: '#0f0f0f',       
     text: '#ffffff',
-    border: '#27272a',     // Color zinc-800 para bordes
+    border: '#27272a',     
   },
 };
 
 export default function Layout() {
+  const [appIsReady, setAppIsReady] = useState(false);
+  const [animationFinished, setAnimationFinished] = useState(false);
+  const animationRef = useRef<LottieView>(null);
 
   useEffect(() => {
-    // Configuración nativa para Android (Barras de sistema)
-    if (Platform.OS === 'android') {
-      SystemUI.setBackgroundColorAsync("#0f0f0f"); // Fondo de la ventana nativa
-      NavigationBar.setVisibilityAsync("hidden");
-      NavigationBar.setBehaviorAsync("overlay-swipe");
-      NavigationBar.setBackgroundColorAsync("transparent");
-    }
-
-    // Inicialización de RevenueCat
-    const initRevenueCat = async () => {
+    async function prepare() {
       try {
         if (Platform.OS === 'android') {
-           await Purchases.configure({ apiKey: REVENUECAT_API_KEY });
+          await SystemUI.setBackgroundColorAsync("#0f0f0f");
+          await NavigationBar.setVisibilityAsync("hidden");
+          await NavigationBar.setBehaviorAsync("overlay-swipe");
+          await NavigationBar.setBackgroundColorAsync("transparent");
         }
-        // await Purchases.setLogLevel(Purchases.LOG_LEVEL.DEBUG);
-      } catch (e) {
-        console.error("Error inicializando RevenueCat", e);
-      }
-    };
 
-    initRevenueCat();
+        const initRevenueCat = async () => {
+          try {
+            if (Platform.OS === 'android') {
+               await Purchases.configure({ apiKey: REVENUECAT_API_KEY });
+            }
+          } catch (e) {
+            console.error("Error inicializando RevenueCat", e);
+          }
+        };
+
+        await initRevenueCat();
+      } catch (e) {
+        console.warn(e);
+      } finally {
+        setAppIsReady(true);
+      }
+    }
+
+    prepare();
   }, []);
 
+  // Ocultar splash nativo y reproducir Lottie cuando la app esté lista
+  useEffect(() => {
+    if (appIsReady) {
+      SplashScreen.hideAsync();
+      
+      // Pequeño delay en Android para suavidad (igual que en tu ejemplo)
+      if (Platform.OS === 'android') {
+        setTimeout(() => {
+          animationRef.current?.play();
+        }, 50);
+      } else {
+        animationRef.current?.play();
+      }
+    }
+  }, [appIsReady]);
+
+  if (!appIsReady || !animationFinished) {
+    return (
+      <View style={[styles.container, { backgroundColor: '#000000' }]}>
+        <LottieView
+          ref={animationRef}
+          source={require('../assets/animations/splash-animation.json')}
+          autoPlay={false} // Controlamos el play manualmente
+          loop={false}
+          resizeMode="cover"
+          onAnimationFinish={() => setAnimationFinished(true)}
+          style={styles.lottie} // <--- AQUI ESTABA LA DIFERENCIA
+        />
+      </View>
+    );
+  }
+
   return (
-    // 3. Envolvemos la app en el ThemeProvider con nuestro tema forzado
     <ThemeProvider value={AuraTheme}>
       <Stack 
         screenOptions={{ 
           headerShown: false,
-          // 4. Aseguramos que cada pantalla tenga el fondo correcto por defecto
           contentStyle: { backgroundColor: '#0f0f0f' },
-          // Opcional: Si en Android la animación sigue siendo brusca, puedes cambiarla:
           animation: 'slide_from_right' 
         }}
       >
@@ -69,3 +113,16 @@ export default function Layout() {
     </ThemeProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  lottie: {
+    // CORRECCIÓN: Tamaño fijo en lugar de porcentajes
+    width: 250, 
+    height: 250,
+  },
+});
