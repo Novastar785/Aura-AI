@@ -1,6 +1,7 @@
 import * as FileSystem from 'expo-file-system/legacy';
 import Purchases from 'react-native-purchases';
 import { supabase } from '../config/supabase';
+import i18n from '../i18n'; // <--- ÚNICA IMPORTACIÓN NUEVA
 
 export const MODELS = {
   ARTIST_PRO: "gemini-3-pro-image-preview", 
@@ -17,7 +18,8 @@ export const generateAIImage = async (
   
   try {
     const appUserID = await Purchases.getAppUserID();
-    if (!appUserID) throw new Error("ID de usuario no encontrado.");
+    // CAMBIO 1: Traducción del mensaje de error
+    if (!appUserID) throw new Error(i18n.t('errors.user_id_missing'));
 
     const base64 = await FileSystem.readAsStringAsync(imageUri, { encoding: 'base64' });
     
@@ -49,13 +51,15 @@ export const generateAIImage = async (
 
     if (data && data.error) {
         if (data.code === 'INSUFFICIENT_CREDITS' || data.error.includes("Saldo insuficiente")) {
+            // Mantenemos este código igual porque la UI lo detecta
             throw new Error("INSUFFICIENT_CREDITS");
         }
         throw new Error(data.error);
     }
 
     if (!data || !data.image) {
-        throw new Error("La nube no devolvió imagen.");
+        // CAMBIO 2: Traducción del mensaje de error
+        throw new Error(i18n.t('errors.no_image_returned'));
     }
 
     return data.image;

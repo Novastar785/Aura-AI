@@ -17,10 +17,10 @@ cssInterop(LinearGradient, {
 const { width } = Dimensions.get('window');
 
 const PLACEHOLDER_GALLERY = [
-  { id: 'p1', uri: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&q=80' },
-  { id: 'p2', uri: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&q=80' },
-  { id: 'p3', uri: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&q=80' },
-  { id: 'p4', uri: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&q=80' },
+  { id: 'p1', uri: 'https://rizzflows.com/img_aura/gallery/placeholder1.png' },
+  { id: 'p2', uri: 'https://rizzflows.com/img_aura/gallery/placeholder2.jpg' },
+  { id: 'p3', uri: 'https://rizzflows.com/img_aura/gallery/placeholder3.jpg' },
+  { id: 'p4', uri: 'https://rizzflows.com/img_aura/gallery/placeholder4.jpg' },
 ];
 
 export default function HomeScreen() {

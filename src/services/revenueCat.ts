@@ -1,6 +1,7 @@
 import { Alert } from 'react-native';
 import Purchases from 'react-native-purchases';
 import { supabase } from '../config/supabase';
+import i18n from '../i18n';
 
 // NOTA: La inicialización de RevenueCat (Purchases.configure) ya se hace en app/_layout.tsx
 // Aquí solo ponemos funciones auxiliares para créditos y restauración.
@@ -43,7 +44,10 @@ export const restorePurchases = async () => {
     return customerInfo;
   } catch (e) {
     console.error("Error restaurando compras:", e);
-    Alert.alert("Error", "No se pudieron restaurar las compras. Intenta de nuevo más tarde.");
+    Alert.alert(
+      i18n.t('common.error'), 
+      i18n.t('store.restore_error')
+    );
     throw e;
   }
 };

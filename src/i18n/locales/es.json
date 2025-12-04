@@ -38,6 +38,7 @@
     "share_error": "No se pudo compartir.",
     "ia_generated": "✨ IA GENERADA",
     "share": "Compartir",
+    "info": "Información",
     "save": "Guardar",
     "cancel": "Cancelar",
     "popular": "POPULAR",
@@ -210,6 +211,11 @@
     "status_free": "FREE",
     "member_pro": "Miembro Pro",
     "member_free": "Miembro Gratuito",
+    "restore_desc": "Recuperar compras",
+    "total_balance": "Balance Total",
+    "plan_premium": "Premium",
+    "plan_standard": "Estándar",
+    "credits_label": "créditos",
     "credits": "Créditos",
     "generated": "Generadas",
     "manage_sub": "Gestionar Suscripción",
@@ -223,10 +229,15 @@
     "subject": "Soporte Aura AI",
     "error_mail": "No se pudo abrir la aplicación de correo."
   },
+  "errors": {
+    "user_id_missing": "ID de usuario no encontrado.",
+    "no_image_returned": "La nube no devolvió ninguna imagen."
+  },
   "store": {
     "success_title": "¡Éxito!",
     "success_msg": "Tu compra se ha realizado correctamente.",
     "restore_title": "Restaurado",
-    "restore_msg": "Tus compras han sido restauradas."
+    "restore_msg": "Tus compras han sido restauradas.",
+    "restore_error": "No se pudieron restaurar las compras. Intenta de nuevo más tarde."
   }
 }

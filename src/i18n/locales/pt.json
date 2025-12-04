@@ -28,6 +28,7 @@
     "permissions_missing": "Faltam permissões",
     "permissions_access": "Precisamos de acesso para continuar.",
     "error": "Erro",
+    "info": "Informação",
     "error_generation": "O modelo não conseguiu gerar a imagem. Tente novamente.",
     "error_technical": "Houve um problema técnico.",
     "error_connection": "Falha na conexão.",
@@ -211,6 +212,11 @@
     "member_pro": "Membro Pro",
     "member_free": "Membro Gratuito",
     "credits": "Créditos",
+    "restore_desc": "Restaurar compras",
+    "total_balance": "Saldo Total",
+    "plan_premium": "Premium",
+    "plan_standard": "Padrão",
+    "credits_label": "créditos",
     "generated": "Geradas",
     "manage_sub": "Gerenciar Assinatura",
     "manage_sub_desc": "Faturamento e planos",
@@ -223,10 +229,15 @@
     "subject": "Suporte Aura AI",
     "error_mail": "Não foi possível abrir o aplicativo de e-mail."
   },
+  "errors": {
+    "user_id_missing": "ID do usuário não encontrado.",
+    "no_image_returned": "A nuvem não retornou nenhuma imagem."
+  },
   "store": {
     "success_title": "Sucesso!",
     "success_msg": "Sua compra foi realizada com sucesso.",
     "restore_title": "Restaurado",
-    "restore_msg": "Suas compras foram restauradas."
+    "restore_msg": "Suas compras foram restauradas.",
+    "restore_error": "Não foi possível restaurar as compras. Tente novamente mais tarde."
   }
 }

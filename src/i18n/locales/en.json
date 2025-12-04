@@ -28,6 +28,7 @@
     "permissions_missing": "Missing permissions",
     "permissions_access": "We need access to continue.",
     "error": "Error",
+    "info": "Info",
     "error_generation": "The model could not generate the image. Try again.",
     "error_technical": "There was a technical problem.",
     "error_connection": "Connection failed.",
@@ -211,6 +212,11 @@
     "member_pro": "Pro Member",
     "member_free": "Free Member",
     "credits": "Credits",
+    "restore_desc": "Restore purchases",
+    "total_balance": "Total Balance",
+    "plan_premium": "Premium",
+    "plan_standard": "Standard",
+    "credits_label": "credits",
     "generated": "Generated",
     "manage_sub": "Manage Subscription",
     "manage_sub_desc": "Billing and plans",
@@ -223,10 +229,15 @@
     "subject": "Aura AI Support",
     "error_mail": "Could not open mail app."
   },
+  "errors": {
+    "user_id_missing": "User ID not found.",
+    "no_image_returned": "The cloud did not return any image."
+  },
   "store": {
     "success_title": "Success!",
     "success_msg": "Your purchase was successful.",
     "restore_title": "Restored",
-    "restore_msg": "Your purchases have been restored."
+    "restore_msg": "Your purchases have been restored.",
+    "restore_error": "Could not restore purchases. Please try again later."
   }
 }

@@ -92,7 +92,7 @@ export default function ProfileScreen() {
       await RevenueCatUI.presentCustomerCenter();
       await loadData();
     } catch (e) {
-      Alert.alert("Info", t('profile.manage_sub_desc'));
+      Alert.alert(t('common.info'), t('profile.manage_sub_desc'));
     }
   };
 
@@ -116,7 +116,7 @@ export default function ProfileScreen() {
     if (canOpen) {
       await Linking.openURL(url);
     } else {
-      Alert.alert("Error", t('profile.error_mail'));
+      Alert.alert(t('common.error'), t('profile.error_mail'));
     }
   };
 
@@ -139,13 +139,13 @@ export default function ProfileScreen() {
       bgIcon: 'bg-violet-500/10'
     },
     { 
-      icon: RefreshCcw, 
-      label: t('store.restore_title') || "Restaurar", 
-      action: handleRestore,
-      subtitle: "Recuperar compras",
-      iconColor: '#14b8a6', 
-      bgIcon: 'bg-teal-500/10'
-    },
+  icon: RefreshCcw, 
+  label: t('store.restore_title'), 
+  action: handleRestore,
+  subtitle: t('profile.restore_desc'), // <--- CAMBIO AQUÍ
+  iconColor: '#14b8a6', 
+  bgIcon: 'bg-teal-500/10'
+  },
   ];
 
   const legalItems = [
@@ -210,28 +210,33 @@ export default function ProfileScreen() {
             </Text>
           </View>
 
-          {/* ESTADÍSTICAS RÁPIDAS */}
-          <View className="mx-6 mb-8 bg-white/5 rounded-3xl p-4 border border-white/10 backdrop-blur-md">
-            
-            <View className="items-center mb-3 border-b border-white/5 pb-3">
-                 <Text className="text-zinc-400 text-[10px] uppercase tracking-widest mb-1">Total Balance</Text>
-                 <Text className="text-4xl font-bold text-white shadow-sm">{credits.total}</Text>
-            </View>
+           {/* ESTADÍSTICAS RÁPIDAS (CÓDIGO CORREGIDO) */}
+           <View className="mx-6 mb-8 bg-white/5 rounded-3xl p-4 border border-white/10 backdrop-blur-md">
+  
+             <View className="items-center mb-3 border-b border-white/5 pb-3">
+              {/* Cambio: Total Balance -> t('profile.total_balance') */}
+              <Text className="text-zinc-400 text-[10px] uppercase tracking-widest mb-1">{t('profile.total_balance')}</Text>
+              <Text className="text-4xl font-bold text-white shadow-sm">{credits.total}</Text>
+              </View>
 
             <View className="flex-row">
-                <View className="flex-1 items-center border-r border-white/10">
-                  <Text className="text-xl font-bold text-white">{credits.sub}</Text>
-                  <Text className="text-amber-300 text-[10px] font-bold uppercase tracking-wider mt-1">Premium</Text>
-                  <Text className="text-zinc-500 text-[8px] uppercase tracking-widest">credits</Text>
-                </View>
-
-                <View className="flex-1 items-center">
-                  <Text className="text-xl font-bold text-white">{credits.pack}</Text>
-                  <Text className="text-indigo-300 text-[10px] font-bold uppercase tracking-wider mt-1">Standard</Text>
-                  <Text className="text-zinc-500 text-[8px] uppercase tracking-widest">credits</Text>
-                </View>
+            <View className="flex-1 items-center border-r border-white/10">
+            <Text className="text-xl font-bold text-white">{credits.sub}</Text>
+            {/* Cambio: Premium -> t('profile.plan_premium') */}
+            <Text className="text-amber-300 text-[10px] font-bold uppercase tracking-wider mt-1">{t('profile.plan_premium')}</Text>
+            {/* Cambio: credits -> t('profile.credits_label') */}
+            <Text className="text-zinc-500 text-[8px] uppercase tracking-widest">{t('profile.credits_label')}</Text>
             </View>
-          </View>
+
+      <View className="flex-1 items-center">
+        <Text className="text-xl font-bold text-white">{credits.pack}</Text>
+        {/* Cambio: Standard -> t('profile.plan_standard') */}
+        <Text className="text-indigo-300 text-[10px] font-bold uppercase tracking-wider mt-1">{t('profile.plan_standard')}</Text>
+        {/* Cambio: credits -> t('profile.credits_label') */}
+        <Text className="text-zinc-500 text-[8px] uppercase tracking-widest">{t('profile.credits_label')}</Text>
+      </View>
+  </View>
+</View>
 
           {/* SECCIÓN SUSCRIPCIÓN */}
           <View className="px-6 mb-6">
