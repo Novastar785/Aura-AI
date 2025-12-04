@@ -7,8 +7,8 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const CREDIT_MAP = {
   // SUSCRIPCIONES (Recurrentes - "Use it or lose it")
-  "auraweeklypremium": 150,   // Antes: aura_weekly_premium
-  "auramonthlypremium": 700,  // Antes: aura_monthly_premium
+  "aura_premium:auraweeklypremium": 150,   // Semanal
+  "aura_premium:auramonthlypremium": 700,  // Mensual
   "aurayearlypremium": 10000, // Antes: aura_yearly_premium
 
   // Si usaste guiones medios en Google, descomenta y usa estos:

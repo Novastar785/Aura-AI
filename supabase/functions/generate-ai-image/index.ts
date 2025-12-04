@@ -29,8 +29,8 @@ serve(async (req) => {
       throw new Error("ERROR CRÍTICO: No encontré la llave GEMINI_API_KEY_AURA en los secretos de Supabase.");
     }
 
-    // 3. Recibimos los datos (NOTA: Ya no recibimos 'prompt' texto, sino IDs)
-    const { imageBase64, garmentBase64, modelName, user_id, feature_id, variant } = await req.json();
+    // 3. Recibimos los datos (CAMBIO: Eliminamos 'modelName' ya que no lo usaremos desde la App)
+    const { imageBase64, garmentBase64, user_id, feature_id, variant } = await req.json();
 
     if (!imageBase64 || !feature_id) {
       throw new Error("Faltan datos: No llegó la imagen principal o el feature_id.");
@@ -110,7 +110,11 @@ serve(async (req) => {
 
 
     // 4. Conectamos con Google (Lado Servidor)
-    const modelId = modelName || "gemini-3-pro-image-preview";
+    // CAMBIO: Usamos 'promptData.model_id' de la DB. Si está vacío, usamos el nuevo default.
+    const modelId = promptData.model_id || "gemini-2.5-flash-image";
+    // 👇 Log de la consola para ver que modelo se esta usando 👇
+    console.log(`🤖 Usando modelo definido en DB: ${modelId}`); 
+    // 👆 ---------------------- 👆
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: modelId });
 

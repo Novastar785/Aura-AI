@@ -3,10 +3,6 @@ import Purchases from 'react-native-purchases';
 import { supabase } from '../config/supabase';
 import i18n from '../i18n'; // <--- ÚNICA IMPORTACIÓN NUEVA
 
-export const MODELS = {
-  ARTIST_PRO: "gemini-3-pro-image-preview", 
-};
-
 export const generateAIImage = async (
   imageUri: string, 
   featureKey: string, // Ej: 'stylist'
@@ -14,7 +10,6 @@ export const generateAIImage = async (
   garmentUri: string | null = null
 ): Promise<string> => {
   
-  const modelId = MODELS.ARTIST_PRO;
   
   try {
     const appUserID = await Purchases.getAppUserID();
@@ -39,7 +34,6 @@ export const generateAIImage = async (
             
             imageBase64: base64,
             garmentBase64: garmentBase64,
-            modelName: modelId,
             user_id: appUserID,
         }
     });
