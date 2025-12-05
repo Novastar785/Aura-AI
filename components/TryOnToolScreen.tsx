@@ -110,8 +110,16 @@ export default function TryOnToolScreen({ title, subtitle, price, backgroundImag
     if (!resultImage) return;
     setIsSaving(true);
     try {
-      const { status } = await MediaLibrary.requestPermissionsAsync();
-      if (status !== 'granted') return Alert.alert(t('common.permission_denied'));
+      const { status } = await MediaLibrary.getPermissionsAsync();
+      let finalStatus = status;
+
+      if (status !== 'granted') {
+        const { status: newStatus } = await MediaLibrary.requestPermissionsAsync();
+        finalStatus = newStatus;
+      }
+
+      if (finalStatus !== 'granted') return Alert.alert(t('common.permission_denied'));
+
       const filename = FileSystem.cacheDirectory + `aura_tryon_${Date.now()}.png`;
       const base64Code = resultImage.includes('base64,') ? resultImage.split('base64,')[1] : resultImage;
       await FileSystem.writeAsStringAsync(filename, base64Code, { encoding: 'base64' });

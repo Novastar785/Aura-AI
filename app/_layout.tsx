@@ -6,6 +6,7 @@ import * as SystemUI from 'expo-system-ui';
 import LottieView from 'lottie-react-native';
 import { useEffect, useRef, useState } from "react";
 import { Platform, StyleSheet, View } from "react-native";
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Purchases from 'react-native-purchases';
 
 // Importaciones locales
@@ -104,17 +105,20 @@ export default function Layout() {
   }
 
   return (
-    <ThemeProvider value={AuraTheme}>
-      <Stack 
-        screenOptions={{ 
-          headerShown: false,
-          contentStyle: { backgroundColor: '#0f0f0f' },
-          animation: 'slide_from_right' 
-        }}
-      >
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      </Stack>
-    </ThemeProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ThemeProvider value={AuraTheme}>
+        <Stack 
+          screenOptions={{ 
+            headerShown: false,
+            contentStyle: { backgroundColor: '#0f0f0f' },
+            animation: 'fade', 
+          }}
+        >
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="onboarding" options={{ headerShown: false, animation: 'fade' }} />
+        </Stack>
+      </ThemeProvider>
+    </GestureHandlerRootView>
   );
 }
 

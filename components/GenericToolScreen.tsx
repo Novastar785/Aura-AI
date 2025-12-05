@@ -131,8 +131,17 @@ export default function GenericToolScreen({ title, subtitle, price, backgroundIm
     if (!resultImage) return;
     setIsSaving(true);
     try {
-      const { status } = await MediaLibrary.requestPermissionsAsync();
-      if (status !== 'granted') return Alert.alert(t('common.permission_denied'));
+      // 1. Verificar si YA tenemos permiso
+      const { status } = await MediaLibrary.getPermissionsAsync();
+      let finalStatus = status;
+
+      // 2. Si no lo tenemos, pedirlo
+      if (status !== 'granted') {
+        const { status: newStatus } = await MediaLibrary.requestPermissionsAsync();
+        finalStatus = newStatus;
+      }
+
+      if (finalStatus !== 'granted') return Alert.alert(t('common.permission_denied'));
       
       const directory = FileSystem.cacheDirectory;
       const filename = directory + `aura_ai_${Date.now()}.png`;

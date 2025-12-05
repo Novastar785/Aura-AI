@@ -1,11 +1,11 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import * as MediaLibrary from 'expo-media-library';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { Plus, Sparkles } from 'lucide-react-native';
+import { Plus, Sparkles, X } from 'lucide-react-native';
 import { cssInterop } from "nativewind";
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Dimensions, Image, ScrollView, StatusBar, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, Image, Modal, ScrollView, StatusBar, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRemoteConfig } from '../../hooks/useRemoteConfig'; // <--- AGREGAR ESTO
 import { getUserCredits } from '../../src/services/revenueCat';
@@ -32,6 +32,9 @@ export default function HomeScreen() {
   const [galleryPhotos, setGalleryPhotos] = useState<any[]>([]);
   const [hasPermission, setHasPermission] = useState<boolean>(false);
   const [credits, setCredits] = useState(0);
+  const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null); // <--- NUEVO
+
+  // Cargar créditos cada vez que la pantalla se enfoca
 
   // Cargar créditos cada vez que la pantalla se enfoca
   useFocusEffect(
@@ -249,13 +252,14 @@ export default function HomeScreen() {
                   </View>
                 )}
               </View>
-              <Text className="text-zinc-400 text-sm">{t('home.see_all')}</Text>
             </View>
             
             <View className="flex-row flex-wrap justify-between">
               {displayPhotos.map((photo) => (
-                <View 
+                <TouchableOpacity 
                   key={photo.id} 
+                  activeOpacity={0.8}
+                  onPress={() => setSelectedPhoto(photo.uri)}
                   className="bg-zinc-900 rounded-3xl mb-4 overflow-hidden border border-zinc-800 relative"
                   style={{ width: (width - 48) / 2 - 6, height: 220 }}
                 >
@@ -266,7 +270,7 @@ export default function HomeScreen() {
                         <Text className="text-white text-[10px] font-medium tracking-wide">{t('home.example_tag')}</Text>
                      </View>
                   )}
-                </View>
+                </TouchableOpacity>
               ))}
             </View>
 
@@ -278,6 +282,29 @@ export default function HomeScreen() {
           </View>
         </ScrollView>       
       </View>
+
+      {/* MODAL PARA VER FOTO EN GRANDE */}
+      <Modal 
+        visible={!!selectedPhoto} 
+        transparent={true} 
+        animationType="fade"
+        onRequestClose={() => setSelectedPhoto(null)}
+      >
+        <View className="flex-1 bg-black justify-center items-center relative">
+            <Image 
+              source={{ uri: selectedPhoto || "" }} 
+              style={{ width: width, height: '100%' }} 
+              resizeMode="contain" 
+            />
+            <TouchableOpacity 
+              onPress={() => setSelectedPhoto(null)} 
+              className="absolute top-12 right-6 w-10 h-10 bg-black/50 rounded-full items-center justify-center border border-white/20"
+            >
+              <X color="white" size={24} />
+            </TouchableOpacity>
+        </View>
+      </Modal>
+
     </View>
   );
 }

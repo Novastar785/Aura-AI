@@ -5,11 +5,25 @@ import i18n from '../i18n'; // <--- ÚNICA IMPORTACIÓN NUEVA
 
 export const generateAIImage = async (
   imageUri: string, 
-  featureKey: string, // Ej: 'stylist'
-  variant: string | null = null, // Ej: 'rock'
+  featureKey: string, 
+  variant: string | null = null,
   garmentUri: string | null = null
 ): Promise<string> => {
-  
+
+  // --- ⚡ MODO DEBUG: ACTIVA ESTO PARA PROBAR SIN CRÉDITOS ---
+  const DEBUG_MODE = true; // <--- Pon en FALSE cuando vayas a producción
+
+  if (DEBUG_MODE) {
+    console.log("🛠️ MODO DEBUG: Simulando generación de IA...");
+    
+    // 1. Simulamos tiempo de espera (3 segundos)
+    await new Promise(resolve => setTimeout(resolve, 3000));
+
+    // 2. Retornamos una imagen de prueba (URL pública para que funcione el slider)
+    // Puedes cambiar esta URL por cualquier imagen de ejemplo que quieras ver en el resultado
+    return "https://rizzflows.com/img_aura/Image_fx(3).png";
+  }
+  // ------------------------------------------------------------
   
   try {
     const appUserID = await Purchases.getAppUserID();
