@@ -9,6 +9,7 @@ import {
   Lock,
   RefreshCcw,
   Rocket,
+  Trash2,
   User
 } from 'lucide-react-native';
 import React, { useCallback, useState } from 'react';
@@ -19,6 +20,7 @@ import RevenueCatUI from 'react-native-purchases-ui';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { supabase } from '../../src/config/supabase';
 import { restorePurchases } from '../../src/services/revenueCat';
+import { deleteAccount } from '../../src/services/user'; // Importa la función borrar cuenta
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -74,6 +76,25 @@ export default function ProfileScreen() {
     } catch (e) {
       console.log("Error cargando perfil", e);
     }
+  };
+// --- Eliminacion de cuenta ---
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      t('profile.delete_account'), // "Eliminar Cuenta"
+      t('profile.delete_confirm'), // "¿Estás seguro? Perderás todos tus créditos y compras. Esta acción no se puede deshacer."
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        { 
+          text: t('common.delete'), 
+          style: 'destructive', 
+          onPress: async () => {
+            await deleteAccount();
+            // Forzar recarga de datos para mostrar estado "limpio"
+            loadData(); 
+          }
+        }
+      ]
+    );
   };
 
   // --- FUNCIONES DE ACCIÓN ---
@@ -169,6 +190,13 @@ export default function ProfileScreen() {
       action: handleSupport,
       iconColor: '#ec4899', 
       bgIcon: 'bg-pink-500/10'
+    },
+    { 
+      icon: Trash2, // Importar de lucide-react-native
+      label: t('profile.delete_account'), 
+      action: handleDeleteAccount,
+      iconColor: '#ef4444', // Rojo para indicar peligro
+      bgIcon: 'bg-red-500/10'
     },
   ];
 

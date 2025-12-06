@@ -28,6 +28,7 @@
     "permissions_missing": "Missing permissions",
     "permissions_access": "We need access to continue.",
     "error": "Error",
+    "delete": "Delete",
     "info": "Info",
     "error_generation": "The model could not generate the image. Try again.",
     "error_technical": "There was a technical problem.",
@@ -227,8 +228,24 @@
     "terms": "Terms of Service",
     "support": "Help & Support",
     "subject": "Aura AI Support",
+    "delete_account": "Delete Account",
+    "delete_confirm": "Are you sure? You will lose all your credits and purchase history. This action cannot be undone.",
+    "account_deleted_title": "Account Deleted",
+    "account_deleted_msg": "Your account data has been successfully removed.",
+    "delete_error": "Could not delete account. Please try again.",
     "error_mail": "Could not open mail app."
   },
+  "report": {
+  "button": "Report",
+  "title": "Report Content",
+  "msg": "If this image is inappropriate or offensive, please report it. Our team will review it.",
+  "reason_nsfw": "NSFW",
+  "reason_offensive": "Offensive / Hate",
+  "reason_other": "Other",
+  "success_title": "Report Sent",
+  "success_msg": "Thanks for your report. We have hidden the content and will review it shortly.",
+  "block_msg": "Content hidden due to report."
+},
   "errors": {
     "user_id_missing": "User ID not found.",
     "no_image_returned": "The cloud did not return any image."

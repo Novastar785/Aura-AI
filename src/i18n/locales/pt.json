@@ -40,6 +40,7 @@
     "ia_generated": "GERADO POR IA",
     "share": "Compartilhar",
     "save": "Salvar",
+    "delete": "Excluir",
     "cancel": "Cancelar",
     "popular": "POPULAR",
     "camera": "Câmera",
@@ -226,9 +227,25 @@
     "privacy": "Política de Privacidade",
     "terms": "Termos de Serviço",
     "support": "Ajuda e Suporte",
+    "delete_account": "Excluir Conta",
+    "delete_confirm": "Tem certeza? Você perderá todos os seus créditos e histórico de compras. Esta ação não pode ser desfeita.",
+    "account_deleted_title": "Conta Excluída",
+    "account_deleted_msg": "Os dados da sua conta foram removidos com sucesso.",
+    "delete_error": "Não foi possível excluir a conta. Tente novamente.",
     "subject": "Suporte Aura AI",
     "error_mail": "Não foi possível abrir o aplicativo de e-mail."
   },
+  "report": {
+  "button": "Denunciar",
+  "title": "Denunciar Conteúdo",
+  "msg": "Se esta imagem for inapropriada ou ofensiva, por favor, denuncie. Nossa equipe irá analisá-la.",
+  "reason_nsfw": "Nudez / Conteúdo Sexual",
+  "reason_offensive": "Ofensivo / Ódio",
+  "reason_other": "Outro",
+  "success_title": "Denúncia Enviada",
+  "success_msg": "Obrigado pela denúncia. Ocultamos o conteúdo e iremos analisá-lo em breve.",
+  "block_msg": "Conteúdo oculto devido à denúncia."
+},
   "errors": {
     "user_id_missing": "ID do usuário não encontrado.",
     "no_image_returned": "A nuvem não retornou nenhuma imagem."

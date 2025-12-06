@@ -41,6 +41,7 @@
     "info": "Información",
     "save": "Guardar",
     "cancel": "Cancelar",
+    "delete": "Eliminar",
     "popular": "POPULAR",
     "camera": "Cámara",
     "gallery": "Galería",
@@ -226,9 +227,26 @@
     "privacy": "Política de Privacidad",
     "terms": "Términos de Servicio",
     "support": "Ayuda y Soporte",
+    "delete_account": "Eliminar Cuenta",
+    "delete_confirm": "¿Estás seguro? Perderás todos tus créditos e historial de compras. Esta acción no se puede deshacer.",
+    "account_deleted_title": "Cuenta Eliminada",
+    "account_deleted_msg": "Los datos de tu cuenta han sido eliminados correctamente.",
+    "delete_error": "No se pudo eliminar la cuenta. Intente de nuevo.",
     "subject": "Soporte Aura AI",
     "error_mail": "No se pudo abrir la aplicación de correo."
   },
+  "report": {
+   "button": "Reportar",
+   "title": "Reportar Contenido",
+   "msg": "Si esta imagen es inapropiada u ofensiva, por favor repórtala. Nuestro equipo la revisará.",
+   "reason_nsfw": "Desnudos / Sexual",
+   "reason_offensive": "Ofensivo / Odio",
+   "reason_other": "Otro",
+   "success_title": "Reporte Enviado",
+   "success_msg": "Gracias por tu reporte. Hemos ocultado el contenido y lo revisaremos en breve.",
+   "block_msg": "Contenido oculto por reporte."
+  },
+
   "errors": {
     "user_id_missing": "ID de usuario no encontrado.",
     "no_image_returned": "La nube no devolvió ninguna imagen."

@@ -4,12 +4,13 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as MediaLibrary from 'expo-media-library';
 import { useRouter } from 'expo-router';
 import * as Sharing from 'expo-sharing';
-import { ArrowLeft, Camera, CheckCircle2, Download, Share2, Shirt, Sparkles, User } from 'lucide-react-native';
+import { ArrowLeft, Camera, CheckCircle2, Download, Flag, Share2, Shirt, Sparkles, User } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next'; // ✨
 import { ActivityIndicator, Alert, Image, Modal, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { generateAIImage } from '../src/services/gemini';
+import { reportContent } from '../src/services/reportService';
 
 interface TryOnProps {
   title: string;
@@ -138,6 +139,33 @@ export default function TryOnToolScreen({ title, subtitle, price, backgroundImag
         if (await Sharing.isAvailableAsync()) { await Sharing.shareAsync(filename); }
     } catch (error) { Alert.alert(t('common.error'), t('common.share_error')); } finally { setIsSharing(false); }
   };
+  const handleReport = () => {
+    Alert.alert(
+      t('report.title'),
+      t('report.msg'),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        { 
+          text: t('report.reason_nsfw'), 
+          onPress: () => confirmReport('NSFW') 
+        },
+        { 
+          text: t('report.reason_offensive'), 
+          onPress: () => confirmReport('Offensive') 
+        },
+        { 
+          text: t('report.reason_other'), 
+          onPress: () => confirmReport('Other') 
+        },
+      ]
+    );
+  };
+
+  const confirmReport = async (reason: string) => {
+    // Nota: Aquí usamos 'tryon' como featureId fijo
+    await reportContent('tryon', reason, resultImage);
+    setResultImage(null); // Ocultamos la imagen inmediatamente
+  };
 
   if (resultImage) {
     return (
@@ -145,7 +173,22 @@ export default function TryOnToolScreen({ title, subtitle, price, backgroundImag
         <Image source={{ uri: resultImage }} className="absolute w-full h-full" resizeMode="contain" />
         <LinearGradient colors={['transparent', 'rgba(0,0,0,0.9)']} className="absolute bottom-0 w-full h-1/2" />
         <SafeAreaView className="flex-1 justify-between px-6 pb-8">
-          <View className="items-end pt-4"><View className="bg-purple-600 px-3 py-1 rounded-full border border-white/20"><Text className="text-white font-bold text-xs">VIRTUAL TRY ON ✨</Text></View></View>
+
+          {/* 🟢 REEMPLÁZALO POR ESTO: */}
+<View className="flex-row justify-between items-start pt-4">
+  {/* Botón de Reporte */}
+  <TouchableOpacity 
+    onPress={handleReport}
+    className="w-10 h-10 bg-black/40 rounded-full items-center justify-center border border-white/10"
+  >
+    <Flag size={20} color="#ef4444" />
+  </TouchableOpacity>
+
+  {/* Etiqueta Original */}
+  <View className="bg-purple-600 px-3 py-1 rounded-full border border-white/20">
+    <Text className="text-white font-bold text-xs">VIRTUAL TRY ON ✨</Text>
+  </View>
+</View>
           <View>
             <Text className="text-white text-3xl font-bold text-center mb-6">{t('tryon_tool.result_title')}</Text>
             <View className="flex-row gap-4 mb-4">

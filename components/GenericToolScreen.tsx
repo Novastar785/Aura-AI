@@ -4,10 +4,11 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as MediaLibrary from 'expo-media-library';
 import { useRouter } from 'expo-router';
 import * as Sharing from 'expo-sharing';
-import { ArrowLeft, Camera, Download, Image as ImageIcon, Share2, Sparkles, X } from 'lucide-react-native';
+import { ArrowLeft, Camera, Download, Flag, Image as ImageIcon, Share2, Sparkles, X } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Image, Modal, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { reportContent } from '../src/services/reportService';
 // Importamos la función de IA desde la ruta correcta (src/services)
 import { useTranslation } from 'react-i18next'; // ✨
 import { generateAIImage } from '../src/services/gemini';
@@ -171,6 +172,36 @@ export default function GenericToolScreen({ title, subtitle, price, backgroundIm
     } catch (error) { Alert.alert(t('common.error'), t('common.share_error')); } finally { setIsSharing(false); }
   };
 
+  const handleReport = () => {
+  Alert.alert(
+    t('report.title'),
+    t('report.msg'),
+    [
+      { text: t('common.cancel'), style: 'cancel' },
+      { 
+        text: t('report.reason_nsfw'), 
+        onPress: () => confirmReport('NSFW') 
+      },
+      { 
+        text: t('report.reason_offensive'), 
+        onPress: () => confirmReport('Offensive') 
+      },
+      { 
+        text: t('report.reason_other'), 
+        onPress: () => confirmReport('Other') 
+      },
+    ]
+  );
+};
+
+const confirmReport = async (reason: string) => {
+  // 1. Enviar a Supabase
+  await reportContent(apiMode, reason, resultImage);
+
+  // 2. Ocultar la imagen inmediatamente (Requisito de Apple)
+  setResultImage(null); 
+};
+
   // --- RENDERIZADO: PANTALLA DE RESULTADO ---
   if (resultImage) {
     return (
@@ -178,11 +209,20 @@ export default function GenericToolScreen({ title, subtitle, price, backgroundIm
         <Image source={{ uri: resultImage }} className="absolute w-full h-full" resizeMode="contain" />
         <LinearGradient colors={['transparent', 'rgba(0,0,0,0.9)']} className="absolute bottom-0 w-full h-1/2" />
         <SafeAreaView className="flex-1 justify-between px-6 pb-8">
-          <View className="items-end pt-4">
-            <View className="bg-indigo-500 px-3 py-1 rounded-full shadow-lg">
-               <Text className="text-white font-bold text-xs">{t('common.ia_generated')}</Text>
-            </View>
-          </View>
+         {/* HEADER DE RESULTADO CON REPORTE */}
+  <View className="flex-row justify-between items-start pt-4">
+    {/* Botón Reportar (NUEVO) */}
+    <TouchableOpacity 
+      onPress={handleReport}
+      className="w-10 h-10 bg-black/40 rounded-full items-center justify-center border border-white/10"
+    >
+      <Flag size={20} color="#ef4444" /> {/* Icono rojo */}
+    </TouchableOpacity>
+
+    <View className="bg-indigo-500 px-3 py-1 rounded-full shadow-lg">
+       <Text className="text-white font-bold text-xs">{t('common.ia_generated')}</Text>
+    </View>
+  </View>
           <View>
             <Text className="text-white text-3xl font-bold text-center mb-2">{t('generic_tool.result_title')}</Text>
             <View className="flex-row gap-4 mb-4">
