@@ -30,7 +30,7 @@ export const generateAIImage = async (
 ): Promise<string> => {
 
   // --- ⚡ MODO DEBUG: ACTIVA ESTO PARA PROBAR SIN CRÉDITOS ---
-  const DEBUG_MODE = true; // <--- Asegúrate de que esto esté en false para producción
+  const DEBUG_MODE = false; // <--- Asegúrate de que esto esté en false para producción
 
   if (DEBUG_MODE) {
     console.log("🛠️ MODO DEBUG: Simulando generación de IA...");
