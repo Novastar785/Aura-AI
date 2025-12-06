@@ -1,7 +1,26 @@
 import * as FileSystem from 'expo-file-system/legacy';
+import * as ImageManipulator from 'expo-image-manipulator'; // <--- NUEVA IMPORTACIÓN
 import Purchases from 'react-native-purchases';
 import { supabase } from '../config/supabase';
-import i18n from '../i18n'; // <--- ÚNICA IMPORTACIÓN NUEVA
+import i18n from '../i18n';
+
+// --- NUEVA FUNCIÓN DE COMPRESIÓN ---
+const compressImage = async (uri: string): Promise<string> => {
+  try {
+    const result = await ImageManipulator.manipulateAsync(
+      uri,
+      [{ resize: { width: 1024 } }], // Redimensionar a un ancho seguro (1024px es ideal para Gemini)
+      { 
+        compress: 0.7, // Calidad 70% (reduce drásticamente el peso sin perder calidad visible para IA)
+        format: ImageManipulator.SaveFormat.JPEG 
+      }
+    );
+    return result.uri;
+  } catch (error) {
+    console.error("Error comprimiendo imagen:", error);
+    return uri; // Si falla, devolvemos la original como fallback
+  }
+};
 
 export const generateAIImage = async (
   imageUri: string, 
@@ -11,30 +30,32 @@ export const generateAIImage = async (
 ): Promise<string> => {
 
   // --- ⚡ MODO DEBUG: ACTIVA ESTO PARA PROBAR SIN CRÉDITOS ---
-  const DEBUG_MODE = true; // <--- Pon en FALSE cuando vayas a producción
+  const DEBUG_MODE = true; // <--- Asegúrate de que esto esté en false para producción
 
   if (DEBUG_MODE) {
     console.log("🛠️ MODO DEBUG: Simulando generación de IA...");
-    
-    // 1. Simulamos tiempo de espera (3 segundos)
     await new Promise(resolve => setTimeout(resolve, 3000));
-
-    // 2. Retornamos una imagen de prueba (URL pública para que funcione el slider)
-    // Puedes cambiar esta URL por cualquier imagen de ejemplo que quieras ver en el resultado
     return "https://rizzflows.com/img_aura/Image_fx(3).png";
   }
   // ------------------------------------------------------------
   
   try {
     const appUserID = await Purchases.getAppUserID();
-    // CAMBIO 1: Traducción del mensaje de error
     if (!appUserID) throw new Error(i18n.t('errors.user_id_missing'));
 
-    const base64 = await FileSystem.readAsStringAsync(imageUri, { encoding: 'base64' });
+    // --- CAMBIO: OPTIMIZACIÓN DE IMÁGENES ANTES DE LEER ---
     
+    // 1. Optimizar y leer imagen principal
+    console.log("🔄 Optimizando imagen principal...");
+    const optimizedImageUri = await compressImage(imageUri);
+    const base64 = await FileSystem.readAsStringAsync(optimizedImageUri, { encoding: 'base64' });
+    
+    // 2. Optimizar y leer prenda (si existe)
     let garmentBase64 = null;
     if (garmentUri) {
-        garmentBase64 = await FileSystem.readAsStringAsync(garmentUri, { encoding: 'base64' });
+        console.log("👗 Optimizando imagen de prenda...");
+        const optimizedGarmentUri = await compressImage(garmentUri);
+        garmentBase64 = await FileSystem.readAsStringAsync(optimizedGarmentUri, { encoding: 'base64' });
     }
     
     console.log(`☁️ Solicitando generación para Feature: ${featureKey}, Variante: ${variant || 'base'}`);
@@ -42,10 +63,8 @@ export const generateAIImage = async (
     // Llamamos a la Edge Function
     const { data, error } = await supabase.functions.invoke('generate-ai-image', {
         body: { 
-            // YA NO ENVIAMOS EL PROMPT DE TEXTO, SOLO LOS IDs
             feature_id: featureKey,
             variant: variant,
-            
             imageBase64: base64,
             garmentBase64: garmentBase64,
             user_id: appUserID,
@@ -59,21 +78,19 @@ export const generateAIImage = async (
 
     if (data && data.error) {
         if (data.code === 'INSUFFICIENT_CREDITS' || data.error.includes("Saldo insuficiente")) {
-            // Mantenemos este código igual porque la UI lo detecta
             throw new Error("INSUFFICIENT_CREDITS");
         }
         throw new Error(data.error);
     }
 
     if (!data || !data.image) {
-        // CAMBIO 2: Traducción del mensaje de error
         throw new Error(i18n.t('errors.no_image_returned'));
     }
 
     return data.image;
 
   } catch (error: any) {
-    console.error("❌ Error servicio Gemini:", error);
+    console.error("❌ Error AI SERVICE:", error);
     throw error;
   }
 };
