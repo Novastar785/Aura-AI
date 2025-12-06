@@ -34,7 +34,7 @@
       "predictiveBackGestureEnabled": false,
       "package": "com.auraai.mobile",
       "versionCode": 1
-     },
+    },
     "web": {
       "output": "static",
       "favicon": "./assets/images/favicon.png"
@@ -68,7 +68,9 @@
           "cameraPermission": "Aura AI needs access to the camera to take a picture to edit.",
           "microphonePermission": "Allow Aura AI to access the microphone."
         }
-      ]
+      ],
+      "expo-localization",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,
