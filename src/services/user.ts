@@ -17,28 +17,25 @@ export const deleteAccount = async () => {
     if (error) throw error;
 
     // 2. Resetear RevenueCat (Crea un nuevo ID anónimo limpio)
-    // Esto "desconecta" al dispositivo del historial de compras anterior
     if (!Purchases.isAnonymous) {
         await Purchases.logOut();
     } 
-    // Si ya es anónimo, logOut no siempre es necesario, pero resetear ayuda:
-    // await Purchases.reset(); // Depende de la versión del SDK, a veces logOut basta.
+    // await Purchases.reset(); 
 
     Alert.alert(
       i18n.t('profile.account_deleted_title'), 
       i18n.t('profile.account_deleted_msg')
     );
     
-    // Aquí podrías redirigir al Onboarding o recargar la app
-    
   } catch (e: any) {
     console.error("Error deleting account:", e);
     Alert.alert(i18n.t('common.error'), i18n.t('profile.delete_error'));
   }
-  }
+};
+
 export const initializeUser = async () => {
   try {
-    // 1. Verificación local rápida para no saturar la base de datos
+    // 1. Verificación local rápida (Igual que antes)
     const isInitialized = await AsyncStorage.getItem('IS_USER_INITIALIZED');
     if (isInitialized === 'true') {
       return; 
@@ -46,49 +43,39 @@ export const initializeUser = async () => {
 
     // 2. Obtener ID de RevenueCat
     const appUserID = await Purchases.getAppUserID();
-    console.log("Verificando usuario en user_credits:", appUserID);
+    console.log("Intentando inicializar usuario vía RPC:", appUserID);
 
-    // 3. Buscar si ya existe en TU tabla 'user_credits'
-    const { data: existingUser, error: fetchError } = await supabase
-      .from('user_credits')
-      .select('*')
-      .eq('user_id', appUserID)
-      .single();
+    // 3. LLAMADA A LA FUNCIÓN SEGURA (RPC)
+    // Ya no hacemos SELECT ni INSERT manual. La base de datos decide.
+    const { data, error } = await supabase.rpc('initialize_new_user', {
+      p_user_id: appUserID
+    });
 
-    if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 = no encontrado
-      console.error("Error buscando usuario:", fetchError);
+    if (error) {
+      // Si falla la conexión, NO guardamos el flag local para que lo intente 
+      // de nuevo la próxima vez que abra la app.
+      console.error("Error llamando a RPC initialize_new_user:", error);
       return;
     }
 
-    // 4. Si NO existe, creamos la fila y regalamos 3 créditos en 'pack_credits'
-    if (!existingUser) {
-      console.log("Usuario nuevo detectado. Regalando créditos...");
+    // 4. Gestionar el resultado
+    // La función SQL devuelve { success: true } si fue creado y recibió regalo.
+    if (data && data.success) {
+      console.log("¡Usuario nuevo creado exitosamente!");
       
-      const { error: insertError } = await supabase
-        .from('user_credits')
-        .insert([
-          { 
-            user_id: appUserID, 
-            subscription_credits: 0,
-            pack_credits: 3 // <--- AQUÍ ESTÁ EL REGALO DE BIENVENIDA
-          }
-        ]);
-
-      if (insertError) {
-        console.error("Error registrando usuario:", insertError);
-      } else {
-        console.log("¡Usuario inicializado con 3 créditos de regalo!");
-        // Opcional: Mostrar alerta
-        Alert.alert("¡Welcome to Aura AI!");
-      }
+      // Mensaje de bienvenida
+      Alert.alert(
+        "¡Welcome to Aura AI!", 
+        "Te hemos regalado 3 créditos para empezar a crear."
+      );
     } else {
-      console.log("El usuario ya tiene registro de créditos.");
+      console.log("El usuario ya existía (o la DB lo reportó como existente).");
     }
 
     // 5. Guardar marca local para no volver a ejecutar esto
     await AsyncStorage.setItem('IS_USER_INITIALIZED', 'true');
 
   } catch (e) {
-    console.error("Error en initializeUser:", e);
+    console.error("Error crítico en initializeUser:", e);
   }
 };
