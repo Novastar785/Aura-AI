@@ -113,7 +113,7 @@
     "data_secure": "Seus dados estão seguros",
     "company_name": "ADSEGOM LTD",
     "app_name": "Aura AI",
-    "contact_email": "info@aura-ai.com",
+    "contact_email": "info@rizzflows.com",
     "terms": {
       "intro": "Bem-vindo ao <bold>{{appName}}</bold>, um aplicativo móvel operado pela <bold>{{companyName}}</bold> ('Empresa', 'nós'). Estes Termos de Serviço regem seu acesso e uso do App. Ao usar os Serviços, você concorda em ficar vinculado a estes Termos Legais.",
       "section_1_title": "1. Acordo de Termos e Elegibilidade",
@@ -173,28 +173,30 @@
       "section_1_title": "1. Informações que Coletamos",
       "section_1_a": "a. Informações que Você Fornece",
       "section_1_a_list": [
-        "Informações da Conta: Nome e e-mail (gerenciado por terceiros).",
-        "Conteúdo do Usuário: Fotos que você envia para processamento de IA."
+        "Conteúdo do Usuário e Dados Faciais: Fotos que você envia para processamento de IA que contêm características faciais."
       ],
       "section_1_b": "b. Informações Coletadas Automaticamente",
       "section_1_b_list": [
         "Dados de Uso: Recursos usados, frequência.",
-        "Informações do Dispositivo: Modelo, versão do SO."
+        "Informações do Dispositivo: Modelo, versão do SO.",
+        "Identificadores Anônimos: IDs de usuário do App para gestão de assinaturas."
       ],
       "section_2_title": "2. Como Usamos suas Informações",
       "section_2_list": [
         "Fornecer e melhorar o App.",
         "Processar Solicitações de IA (gerar avatares, estilos).",
+        "Uso de Dados Faciais: Usamos os dados faciais em suas fotos apenas para aplicar os efeitos de IA que você solicita. Não usamos esses dados para autenticação ou rastreamento.",
         "Gerenciar contas e assinaturas.",
         "Responder a solicitações de suporte."
       ],
       "section_3_title": "3. Como Compartilhamos suas Informações",
       "section_3_text": "Não vendemos seus dados pessoais. Compartilhamos dados apenas com Provedores de IA (para processamento), Infraestrutura de Backend (armazenamento) e Requisitos Legales.",
-      "section_4_title": "4. Processamento e Retenção de Imagens",
+      "section_4_title": "4. Processamento, Dados Faciais e Retenção",
       "section_4_list": [
         "As imagens são enviadas com segurança para provedores de IA.",
-        "NÃO armazenamos permanentemente suas imagens originais após o processamento.",
-        "Mantemos as informações da conta enquanto estiver ativa."
+        "Retenção: NÃO armazenamos permanentemente suas imagens originais contendo dados faciais após o processamento.",
+        "Política de Dados Faciais: Não vendemos, negociamos ou transferimos seus dados faciais a terceiros.",
+        "Mantemos as informações da conta anônima enquanto estiver ativa."
       ],
       "section_5_title": "5. Segurança de Dados",
       "section_5_text": "Usamos medidas de segurança padrão da indústria. No entanto, nenhuma transmissão pela internet é 100% segura.",

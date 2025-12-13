@@ -105,6 +105,7 @@ export default function GenericToolScreen({ title, subtitle, price, backgroundIm
       }
     } catch (error: any) {
       console.error(error);
+      const errorMessage = error.message || '';
       
       // ✅ DETECCIÓN DE SALDO INSUFICIENTE
       if (error.message === 'INSUFFICIENT_CREDITS') {
@@ -119,7 +120,20 @@ export default function GenericToolScreen({ title, subtitle, price, backgroundIm
             }
           ]
         );
-      } else {
+        
+      } 
+      
+else if (
+        errorMessage.includes('Network request failed') || 
+        errorMessage.includes('fetch failed') ||
+        errorMessage.includes('connection error')
+      ) {
+        // Usamos la traducción existente en tu es.json
+        Alert.alert(t('common.error'), t('common.error_connection')); 
+      }
+
+
+      else {
         Alert.alert(t('common.error'), t('common.error_technical'));
       }
     } finally {

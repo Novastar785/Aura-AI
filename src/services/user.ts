@@ -66,7 +66,7 @@ export const initializeUser = async () => {
       // Mensaje de bienvenida
       Alert.alert(
         "¡Welcome to Aura AI!", 
-        "Te hemos regalado 3 créditos para empezar a crear."
+        "As a welcome gift, we've added 3 free credits to your account. Enjoy exploring Aura AI!"
       );
     } else {
       console.log("El usuario ya existía (o la DB lo reportó como existente).");

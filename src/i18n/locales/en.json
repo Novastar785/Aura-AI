@@ -113,7 +113,7 @@
     "data_secure": "Your Data is Secure",
     "company_name": "ADSEGOM LTD",
     "app_name": "Aura AI",
-    "contact_email": "info@aura-ai.com",
+    "contact_email": "info@rizzflows.com",
     "terms": {
       "intro": "Welcome to <bold>{{appName}}</bold>, a mobile application operated by <bold>{{companyName}}</bold> ('Company', 'we', 'us', 'our'). These Terms of Service (the 'Legal Terms') govern your access to and use of the App. By using the Services, you agree to be bound by these Legal Terms.",
       "section_1_title": "1. Agreement to Terms and Eligibility",
@@ -173,28 +173,31 @@
       "section_1_title": "1. Information We Collect",
       "section_1_a": "a. Information You Provide",
       "section_1_a_list": [
-        "Account Information: Name and email (managed by third-party auth).",
-        "User Content: Photos you upload for AI processing."
+        "User Content & Face Data: Photos you upload for AI processing which contain facial features."
       ],
       "section_1_b": "b. Information Collected Automatically",
       "section_1_b_list": [
         "Usage Data: Features used, frequency.",
-        "Device Information: Model, OS version."
+        "Device Information: Model, OS version.",
+        "Anonymous Identifiers: App User IDs for subscription management."
       ],
       "section_2_title": "2. How We Use Your Information",
       "section_2_list": [
         "Provide and improve the App.",
         "Process AI Requests (generate avatars, styles).",
+        "Face Data Usage: We use the face data in your photos solely to apply the AI effects you request. We do not use this data for authentication or tracking.",
+        "Data is shared with AI providers only for the duration of the generation process.",
         "Manage accounts and subscriptions.",
         "Respond to support requests."
       ],
       "section_3_title": "3. How We Share Your Information",
       "section_3_text": "We do not sell your personal data. We share data only with AI Providers (for processing), Backend Infrastructure (for storage), and for Legal Requirements.",
-      "section_4_title": "4. Image Processing & Retention",
+      "section_4_title": "4. Image Processing, Face Data & Retention",
       "section_4_list": [
         "Images are converted and sent to AI providers securely.",
-        "We do NOT permanently store your source images after processing.",
-        "We retain account info while active."
+        "Retention: We do NOT permanently store your source images containing face data after processing.",
+        "Face Data Policy: We do not sell, trade, or transfer your face data to third parties.",
+        "We retain anonymous account info while active."
       ],
       "section_5_title": "5. Data Security",
       "section_5_text": "We use industry-standard security measures. However, no internet transmission is 100% secure.",
