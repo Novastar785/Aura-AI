@@ -13,6 +13,8 @@ import Purchases from 'react-native-purchases';
 import { REVENUECAT_API_KEY } from '../src/config/secrets';
 import "../src/i18n/index";
 import "./global.css";
+// --- NUEVA IMPORTACIÓN ---
+import { initializeUser } from '../src/services/user';
 
 // Mantiene el splash nativo visible hasta que le digamos lo contrario
 SplashScreen.preventAutoHideAsync();
@@ -54,6 +56,11 @@ export default function Layout() {
             if (REVENUECAT_API_KEY) {
                 await Purchases.configure({ apiKey: REVENUECAT_API_KEY });
                 console.log("RevenueCat configurado correctamente");
+
+                // --- NUEVA LLAMADA PARA REGISTRAR AL USUARIO Y DAR CRÉDITOS ---
+                await initializeUser(); 
+                // -------------------------------------------------------------
+
             } else {
                 console.warn("No se encontró API Key de RevenueCat");
             }
