@@ -6,7 +6,7 @@ import { useRouter } from 'expo-router';
 import * as Sharing from 'expo-sharing';
 import { ArrowLeft, Camera, Download, Flag, Image as ImageIcon, Share2, Sparkles, X } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Image, Modal, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Dimensions, Image, Modal, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { reportContent } from '../src/services/reportService';
 // Importamos la función de IA desde la ruta correcta (src/services)
@@ -29,6 +29,8 @@ interface ToolProps {
   apiMode: string;        // Modo base de la IA (ej: 'stylist')
   options?: ToolOption[]; // Lista opcional de sub-estilos
 }
+
+const { height } = Dimensions.get('window');
 
 export default function GenericToolScreen({ title, subtitle, price, backgroundImage, apiMode, options }: ToolProps) {
   const router = useRouter();
@@ -73,10 +75,9 @@ export default function GenericToolScreen({ title, subtitle, price, backgroundIm
       return Alert.alert(t('common.permissions_missing'), t('common.permissions_access'));
     }
 
-    // Nombramos 'pickerOptions' para no confundir con las 'options' de estilos
     const pickerOptions: ImagePicker.ImagePickerOptions = {
       mediaTypes: ImagePicker.MediaTypeOptions.Images, 
-      allowsEditing: false, // 🔥 FIX: Desactiva el crop para evitar glitches y permitir fotos completas
+      allowsEditing: false, 
       quality: 0.8 
     };
 
@@ -95,7 +96,6 @@ export default function GenericToolScreen({ title, subtitle, price, backgroundIm
     setLoadingStage(t('common.generating')); 
     
     try {
-      // Enviamos la imagen, el modo base y la variante seleccionada (si hay)
       const generatedImageBase64 = await generateAIImage(selectedImage, apiMode, selectedOption);
 
       if (generatedImageBase64) {
@@ -107,7 +107,6 @@ export default function GenericToolScreen({ title, subtitle, price, backgroundIm
       console.error(error);
       const errorMessage = error.message || '';
       
-      // ✅ DETECCIÓN DE SALDO INSUFICIENTE
       if (error.message === 'INSUFFICIENT_CREDITS') {
         Alert.alert(
           t('common.insufficient_title'),
@@ -116,24 +115,17 @@ export default function GenericToolScreen({ title, subtitle, price, backgroundIm
             { text: t('common.cancel'), style: "cancel" },
             { 
               text: t('common.go_store'), 
-              onPress: () => router.push('/(tabs)/store') // 🛒 Redirige a la tienda
+              onPress: () => router.push('/(tabs)/store') 
             }
           ]
         );
-        
-      } 
-      
-else if (
+      } else if (
         errorMessage.includes('Network request failed') || 
         errorMessage.includes('fetch failed') ||
         errorMessage.includes('connection error')
       ) {
-        // Usamos la traducción existente en tu es.json
         Alert.alert(t('common.error'), t('common.error_connection')); 
-      }
-
-
-      else {
+      } else {
         Alert.alert(t('common.error'), t('common.error_technical'));
       }
     } finally {
@@ -146,11 +138,9 @@ else if (
     if (!resultImage) return;
     setIsSaving(true);
     try {
-      // 1. Verificar si YA tenemos permiso
       const { status } = await MediaLibrary.getPermissionsAsync();
       let finalStatus = status;
 
-      // 2. Si no lo tenemos, pedirlo
       if (status !== 'granted') {
         const { status: newStatus } = await MediaLibrary.requestPermissionsAsync();
         finalStatus = newStatus;
@@ -187,34 +177,22 @@ else if (
   };
 
   const handleReport = () => {
-  Alert.alert(
-    t('report.title'),
-    t('report.msg'),
-    [
-      { text: t('common.cancel'), style: 'cancel' },
-      { 
-        text: t('report.reason_nsfw'), 
-        onPress: () => confirmReport('NSFW') 
-      },
-      { 
-        text: t('report.reason_offensive'), 
-        onPress: () => confirmReport('Offensive') 
-      },
-      { 
-        text: t('report.reason_other'), 
-        onPress: () => confirmReport('Other') 
-      },
-    ]
-  );
-};
+    Alert.alert(
+      t('report.title'),
+      t('report.msg'),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        { text: t('report.reason_nsfw'), onPress: () => confirmReport('NSFW') },
+        { text: t('report.reason_offensive'), onPress: () => confirmReport('Offensive') },
+        { text: t('report.reason_other'), onPress: () => confirmReport('Other') },
+      ]
+    );
+  };
 
-const confirmReport = async (reason: string) => {
-  // 1. Enviar a Supabase
-  await reportContent(apiMode, reason, resultImage);
-
-  // 2. Ocultar la imagen inmediatamente (Requisito de Apple)
-  setResultImage(null); 
-};
+  const confirmReport = async (reason: string) => {
+    await reportContent(apiMode, reason, resultImage);
+    setResultImage(null); 
+  };
 
   // --- RENDERIZADO: PANTALLA DE RESULTADO ---
   if (resultImage) {
@@ -223,21 +201,20 @@ const confirmReport = async (reason: string) => {
         <Image source={{ uri: resultImage }} className="absolute w-full h-full" resizeMode="contain" />
         <LinearGradient colors={['transparent', 'rgba(0,0,0,0.9)']} className="absolute bottom-0 w-full h-1/2" />
         <SafeAreaView className="flex-1 justify-between px-6 pb-8">
-         {/* HEADER DE RESULTADO CON REPORTE */}
-  <View className="flex-row justify-between items-start pt-4">
-    {/* Botón Reportar (NUEVO) */}
-    <TouchableOpacity 
-      onPress={handleReport}
-      className="w-10 h-10 bg-black/40 rounded-full items-center justify-center border border-white/10"
-    >
-      <Flag size={20} color="#ef4444" /> {/* Icono rojo */}
-    </TouchableOpacity>
+          <View className="flex-row justify-between items-start pt-4">
+            <TouchableOpacity 
+              onPress={handleReport}
+              className="w-10 h-10 bg-black/40 rounded-full items-center justify-center border border-white/10"
+            >
+              <Flag size={20} color="#ef4444" />
+            </TouchableOpacity>
 
-    <View className="bg-indigo-500 px-3 py-1 rounded-full shadow-lg">
-       <Text className="text-white font-bold text-xs">{t('common.ia_generated')}</Text>
-    </View>
-  </View>
-          <View>
+            <View className="bg-indigo-500 px-3 py-1 rounded-full shadow-lg">
+               <Text className="text-white font-bold text-xs">{t('common.ia_generated')}</Text>
+            </View>
+          </View>
+          
+          <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
             <Text className="text-white text-3xl font-bold text-center mb-2">{t('generic_tool.result_title')}</Text>
             <View className="flex-row gap-4 mb-4">
               <TouchableOpacity onPress={handleShare} disabled={isSharing} className="flex-1 h-14 bg-zinc-800 rounded-2xl justify-center items-center border border-white/10">
@@ -250,7 +227,7 @@ const confirmReport = async (reason: string) => {
             <TouchableOpacity onPress={resetState} className="h-12 items-center justify-center">
                <Text className="text-zinc-500 font-bold">{t('generic_tool.try_again')}</Text>
             </TouchableOpacity>
-          </View>
+          </ScrollView>
         </SafeAreaView>
       </View>
     );
@@ -259,7 +236,6 @@ const confirmReport = async (reason: string) => {
   // --- RENDERIZADO: PANTALLA PRINCIPAL (SELECCIÓN) ---
   return (
     <View className="flex-1 bg-[#0f0f0f]">
-      {/* Fondo Dinámico */}
       <Image 
         source={{ uri: selectedImage ? selectedImage : backgroundImage }} 
         className="absolute w-full h-full opacity-60" 
@@ -268,9 +244,9 @@ const confirmReport = async (reason: string) => {
       />
       <LinearGradient colors={['transparent', '#0f0f0f']} className="absolute w-full h-full" />
 
-      <SafeAreaView className="flex-1 px-6">
-        {/* Header */}
-        <View className="flex-row justify-between items-center mb-6">
+      <SafeAreaView className="flex-1">
+        {/* Header Fijo */}
+        <View className="flex-row justify-between items-center px-6 mb-2 pt-2 z-10">
           <TouchableOpacity onPress={() => router.back()} className="w-10 h-10 bg-black/40 rounded-full items-center justify-center border border-white/10">
             <ArrowLeft size={24} color="white" />
           </TouchableOpacity>
@@ -282,15 +258,20 @@ const confirmReport = async (reason: string) => {
           )}
         </View>
 
-        <View className="flex-1 justify-end pb-12">
+        {/* CONTENIDO SCROLLABLE PARA EVITAR "CROWDED" EN PANTALLAS PEQUEÑAS */}
+        <ScrollView 
+          contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-end', paddingBottom: 40, paddingHorizontal: 24 }}
+          showsVerticalScrollIndicator={false}
+        >
           {!selectedImage ? (
             // ESTADO 1: ANTES DE SUBIR FOTO
-            <>
+            <View className="mb-8">
               <View className="bg-rose-500 self-start px-3 py-1 rounded-full mb-4 shadow-lg">
                 <Text className="text-white text-xs font-bold">{t('common.popular')}</Text>
               </View>
-              <Text className="text-white text-4xl font-bold mb-2">{title}</Text>
-              <Text className="text-zinc-400 text-lg mb-8">{subtitle}</Text>
+              {/* Ajuste de tamaño de fuente para pantallas pequeñas */}
+              <Text className="text-white text-3xl font-bold mb-2 shadow-black shadow-lg">{title}</Text>
+              <Text className="text-zinc-300 text-lg mb-8 shadow-black shadow-lg">{subtitle}</Text>
               <TouchableOpacity 
                 className="w-full h-16 bg-indigo-500 rounded-2xl flex-row items-center justify-center shadow-lg shadow-indigo-500/50"
                 onPress={() => setShowSelectionModal(true)}
@@ -298,14 +279,13 @@ const confirmReport = async (reason: string) => {
                 <Camera size={24} color="white" className="mr-3" />
                 <Text className="text-white font-bold text-lg">{t('common.upload_photo')} ({price} 💎)</Text>
               </TouchableOpacity>
-            </>
+            </View>
           ) : (
             // ESTADO 2: FOTO LISTA, ELIGIENDO ESTILO
-            <View className="bg-black/80 p-6 rounded-3xl border border-white/10 backdrop-blur-xl">
+            <View className="bg-black/85 p-6 rounded-3xl border border-white/10 backdrop-blur-xl mb-4">
                 <Text className="text-white text-xl font-bold mb-1 text-center">{t('generic_tool.photo_selected')}</Text>
                 <Text className="text-zinc-400 text-sm mb-6 text-center">{t('generic_tool.ready_process')}</Text>
 
-                {/* --- SECCIÓN DE TARJETAS DE ESTILO (NUEVO) --- */}
                 {options && (
                   <View className="mb-6">
                     <Text className="text-zinc-500 text-xs font-bold mb-3 uppercase tracking-widest ml-1">{t('generic_tool.choose_style')}</Text>
@@ -323,7 +303,6 @@ const confirmReport = async (reason: string) => {
                             className="relative"
                             activeOpacity={0.8}
                           >
-                            {/* IMAGEN DE LA TARJETA */}
                             <View 
                               className={`w-24 h-32 rounded-xl overflow-hidden border-2 ${isSelected ? 'border-indigo-500' : 'border-white/20'}`}
                             >
@@ -337,15 +316,11 @@ const confirmReport = async (reason: string) => {
                                 className="absolute bottom-0 w-full h-1/2" 
                               />
                             </View>
-
-                            {/* TEXTO DE LA TARJETA */}
                             <View className="absolute bottom-2 left-0 right-0 items-center">
                               <Text className={`text-xs font-bold ${isSelected ? 'text-white' : 'text-zinc-300'}`}>
                                 {opt.label}
                               </Text>
                             </View>
-
-                            {/* CHECK DE SELECCIÓN */}
                             {isSelected && (
                               <View className="absolute top-2 right-2 bg-indigo-500 rounded-full p-1 shadow-sm">
                                 <Sparkles size={10} color="white" />
@@ -357,7 +332,6 @@ const confirmReport = async (reason: string) => {
                     </ScrollView>
                   </View>
                 )}
-                {/* ------------------------------------------- */}
 
                 <TouchableOpacity 
                   className={`w-full h-16 rounded-2xl flex-row items-center justify-center ${isProcessing ? 'bg-zinc-700' : 'bg-indigo-500'}`}
@@ -373,7 +347,7 @@ const confirmReport = async (reason: string) => {
                 </TouchableOpacity>
             </View>
           )}
-        </View>
+        </ScrollView>
       </SafeAreaView>
 
       <Modal visible={showSelectionModal} transparent animationType="fade">

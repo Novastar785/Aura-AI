@@ -94,7 +94,7 @@ serve(async (req) => {
     
     if (!transaction || !transaction.success) {
       return new Response(JSON.stringify({ error: "Saldo insuficiente", code: "INSUFFICIENT_CREDITS" }), {
-        status: 402, 
+        status: 200, 
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
